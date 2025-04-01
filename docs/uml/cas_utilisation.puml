@@ -1,0 +1,31 @@
+@startuml
+
+actor Technicien
+actor Administrateur
+
+rectangle "Application LaboChrono" {
+  usecase "Sélectionner un protocole" as UC1
+  usecase "Démarrer un chronomètre" as UC2
+  usecase "Mettre en pause/reprendre" as UC3
+  usecase "Recevoir des alertes" as UC4
+  usecase "Ajouter des notes personnelles" as UC5
+  usecase "Exporter un protocole en PDF" as UC6
+  usecase "Créer un protocole personnalisé" as UC7
+  usecase "Synchroniser avec le cloud" as UC8
+  usecase "Gérer les utilisateurs" as UC9
+}
+
+Technicien --> UC1
+Technicien --> UC2
+Technicien --> UC3
+Technicien --> UC4
+Technicien --> UC5
+Technicien --> UC6
+Technicien --> UC7
+Technicien --> UC8
+
+Administrateur --> UC9
+Administrateur --> UC7
+Administrateur --> UC8
+
+@enduml
