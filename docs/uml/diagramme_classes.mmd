@@ -1,0 +1,90 @@
+
+classDiagram
+    class User {
+        +String name
+        +String email
+        +String phone
+        +String cin
+        +String cnt
+        +String password
+    }
+
+    class Labs {
+        +String Title
+        +String Image
+    }
+
+    class Techniques {
+        +String Title
+        +String SubTitle
+        +String Description
+        +int Rate
+        +Date Completed
+        +String Image
+    }
+
+    class Steps {
+        +String Title
+        +String Reactive
+        +String Duration
+        +int State
+    }
+
+    class UserActs {
+        +int UserId
+        +int TechniqueId
+        +Date Completed
+    }
+
+    class Tips {
+        +String Content
+        +int CategoryId
+    }
+
+    class TipCategory {
+        +String Category
+    }
+
+    class StepsProg {
+        +int UserId
+        +int StepId
+        +Date Started
+        +Date Completed
+        +int Progress
+    }
+
+    class DilutionCalc {
+        +double C1
+        +double V1
+        +double C2
+        +double V2
+        +Date Calculated
+    }
+
+    class Quiz {
+        +String Question
+        +List<String> Options
+        +String CorrectAnswer
+        +String Explanation
+        +int CategoryId
+    }
+
+    class QuizResult {
+        +int UserId
+        +int QuizId
+        +bool IsCorrect
+        +Date Attempted
+    }
+
+    %% Relationships
+    User --> UserActs
+    User --> StepsProg
+    User --> QuizResult
+    Labs --> Techniques
+    Techniques --> Steps
+    Techniques --> UserActs
+    Steps --> Tips
+    Tips --> TipCategory
+    StepsProg --> Steps
+    Quiz --> QuizResult
+    DilutionCalc --> User
