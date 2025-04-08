@@ -1,50 +1,62 @@
-# Welcome to your Expo app 👋
+# 📱 React Native App Structure with File System Routing (Expo Router)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## 🔍 Summary
 
-## Get started
+This project uses **Expo Router** to implement file-based navigation in a React Native application. The routing system is inspired by Next.js, where the folder and file structure directly determines the app's navigation paths.
 
-1. Install dependencies
+The core directory for routing is the `app/` folder. Each file or folder inside `app/` automatically becomes a screen or a group of screens, allowing intuitive and scalable navigation without manual route declarations.
 
-   ```bash
-   npm install
-   ```
+### 🗂 Structure Overview
+- `app/`
+This is the root folder where all your app's routes live. Every file or folder inside it becomes a route or layout in the navigation.
 
-2. Start the app
+- `app/_layout.tsx`
+Defines the root layout for your app. Typically wraps all child routes with a Stack navigator, allowing nested screens to function within a navigation context.
 
-   ```bash
-    npx expo start
-   ```
+- `app/+not-found.tsx`
+A special screen that is automatically shown when the user navigates to an undefined or non-existent route. Acts like a "404 Not Found" page.
 
-In the output, you'll find options to open the app in a
+- `app/(tabs)/`
+A group folder used to organize related routes, like those within a tab navigator. The parentheses in the folder name mean it doesn't affect the URL path.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- `app/(tabs)/_layout.tsx`
+This layout defines the Tab navigator for all screens inside the (tabs) folder. Each screen here becomes a separate tab in the UI.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- `app/(tabs)/index.tsx`
+This is the default tab screen, typically the home tab. It's shown when navigating to the base path of the tabs layout.
 
-## Get a fresh project
+- `app/(tabs)/explore.tsx`
+Another tab screen. Navigating to /explore will render this screen within the tab layout.
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 🧭 File System Routing - How It Works
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+File system routing maps your file and folder structure to app navigation paths automatically:
 
-## Learn more
+- **`_layout.tsx`**  
+  Used to wrap child routes with navigators (e.g., Stack, Tabs). Nested layouts can create scoped navigators.
 
-To learn more about developing your project with Expo, look at the following resources:
+- **`index.tsx`**  
+  The default route for a folder. `app/index.tsx` is the root screen; `(tabs)/index.tsx` is the default tab.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- **`(name)/`**  
+  Grouped routes. Parentheses in folder names (e.g., `(tabs)/`) allow grouping without affecting the URL path.
 
-## Join the community
+- **`+not-found.tsx`**  
+  Special route shown when navigating to an undefined path (404 behavior).
 
-Join our community of developers creating universal apps.
+- **Dynamic Routes** (not in this example but supported):  
+  Use `[param].tsx` to create dynamic paths (e.g., `app/profile/[id].tsx` → `/profile/123`).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## ✅ Benefits
+
+- No manual route registration
+- Clean and scalable file structure
+- Supports nested and grouped navigators
+- Intuitive URL mapping for native apps
+
+---
+
