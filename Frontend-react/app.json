@@ -1,10 +1,10 @@
 {
   "expo": {
     "name": "TechLab",
-    "slug": "techlab",
+    "slug": "TechLab-Pro",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/microscope.png",
     "scheme": "techlab",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -36,6 +36,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "redirectUri": "https://auth.expo.io/@Zakaria/TechLab-Pro"
     }
   }
 }

@@ -1,3 +1,4 @@
+// namespace: (auth)/register
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
