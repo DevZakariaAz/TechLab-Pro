@@ -1,31 +1,36 @@
 @startuml
 
-actor Technicien
-actor Administrateur
+title Cas d'utilisation détaillé : Utiliser une technique de coloration (ex : H&E)
 
-rectangle "Application LaboChrono" {
-  usecase "Sélectionner un protocole" as UC1
-  usecase "Démarrer un chronomètre" as UC2
-  usecase "Mettre en pause/reprendre" as UC3
-  usecase "Recevoir des alertes" as UC4
-  usecase "Ajouter des notes personnelles" as UC5
-  usecase "Exporter un protocole en PDF" as UC6
-  usecase "Créer un protocole personnalisé" as UC7
-  usecase "Synchroniser avec le cloud" as UC8
-  usecase "Gérer les utilisateurs" as UC9
+actor "Technicien de laboratoire" as TechLab
+left to right direction
+rectangle "Application Mobile TechLab Pro" {
+    
+    usecase UC1 as "Sélectionner le laboratoire"
+    usecase UC2 as "Consulter les techniques"
+    usecase UC3 as "Sélectionner la technique H&E"
+    usecase UC4 as "Afficher les détails H&E"
+    usecase UC5 as "Démarrer minuteries H&E"
+    usecase UC6 as "Recevoir alertes/instructions"
+    usecase UC7 as "Valider chaque étape"
+    usecase UC8 as "Enregistrer la procédure"
+    usecase EXT1 as "Alerte : réactif manquant"
+    usecase EXT2 as "Alerte : dépassement de temps"
 }
 
-Technicien --> UC1
-Technicien --> UC2
-Technicien --> UC3
-Technicien --> UC4
-Technicien --> UC5
-Technicien --> UC6
-Technicien --> UC7
-Technicien --> UC8
+TechLab --> UC1
+TechLab --> UC2
+TechLab --> UC3
+TechLab --> UC4
+TechLab --> UC5
+' TechLab --> UC6
+' TechLab --> UC7
+TechLab --> UC8
 
-Administrateur --> UC9
-Administrateur --> UC7
-Administrateur --> UC8
+UC5 --> UC6 : <<include>>
+UC6 --> UC7 : <<include>>
+
+UC5 --> EXT1 : <<extend>>
+UC6 --> EXT2 : <<extend>>
 
 @enduml
