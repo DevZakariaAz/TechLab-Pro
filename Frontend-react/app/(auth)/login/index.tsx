@@ -39,13 +39,17 @@ export default function LoginPage() {
   }, [response]);
 
   // Normal login
-  const handleLogin = () => {
-    const result = login(email, password);
+  const handleLogin = async () => {
+    const result = await login(email, password);
+
     if (result.success) {
       console.log('Logged in:', result.user);
-      router.replace('/home');
+      router.replace({
+        pathname: '/home',
+        params: { email: result.user.email },
+      });
     } else {
-      Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
+      Alert.alert('Erreur', result.message || 'Identifiants invalides');
     }
   };
 

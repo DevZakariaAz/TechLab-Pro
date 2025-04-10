@@ -1,13 +1,25 @@
-// api/login.ts
+export const login = async (email: string, password: string) => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-const users = [
-  { email: "test@example.com", password: "123456" },
-  { email: "zakaria@dev.com", password: "password" },
-];
+    const data = await response.json();
 
-export const login = (email: string, password: string) => {
-  const user = users.find(
-    (u) => u.email === email && u.password === password
-  );
-  return user ? { success: true, user } : { success: false };
+    if (response.ok && data.status) {
+      return {
+        success: true,
+        token: data.token,
+        user: data.user,
+      };
+    } else {
+      return { success: false, message: data.message };
+    }
+  } catch (error) {
+    return { success: false, message: 'Erreur serveur ou réseau.' };
+  }
 };
