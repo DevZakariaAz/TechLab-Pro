@@ -29,7 +29,7 @@ export default function WelcomeScreen() {
       </Text>
 
       {/* Buttons */}
-      <Link href="/(auth)/login" asChild>
+      <Link href="/login" asChild>
         <TouchableOpacity style={styles.primaryButton}>
           <Text style={styles.primaryButtonText}>Se connecter</Text>
         </TouchableOpacity>
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
   },
   banner: {
     width: '100%',
-    height: 50,
+    height: 90,
     marginBottom: 30,
   },
   logo: {

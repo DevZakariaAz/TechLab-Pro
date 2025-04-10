@@ -9,18 +9,34 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zakaria.techlab",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to your photo library."
+      }
     },
     "android": {
+      "package": "com.zakaria.techlab",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
+        "foregroundImage": "./assets/images/microscope.png",
+        "backgroundColor": "#00FF00"
+      },
+      "permissions": [
+        "CAMERA",
+        "PHOTO_LIBRARY"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/microscope.png",
+      "meta": {
+        "description": "TechLab: Your Intelligent Lab Assistant",
+        "themeColor": "#00FF00"
+      }
     },
     "plugins": [
       "expo-router",
@@ -28,17 +44,26 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#00FF00",
+          "imageWidth": 200
         }
       ]
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": false
     },
     "extra": {
-      "redirectUri": "https://auth.expo.io/@Zakaria/TechLab-Pro"
-    }
+      "redirectUri": "https://auth.expo.io/@Zakaria/TechLab"
+    },
+    "assets": [
+      "./assets/images/*"
+    ],
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "description": "TechLab is an intelligent laboratory assistant app that helps streamline laboratory tasks."
   }
 }
