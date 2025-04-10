@@ -23,8 +23,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Google login setup
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '519763398505-apjra9g0ijobmam7qi1avjobq5hi91ed.apps.googleusercontent.com',
+    clientId: '519763398505-f0mjd88o47n1o0otrjv08d61n3hkmr3m.apps.googleusercontent.com',
   });
 
   useEffect(() => {
@@ -32,9 +33,16 @@ export default function LoginPage() {
       const { authentication } = response;
       console.log('Google Auth Success:', authentication);
       router.replace('/home');
+    } else if (response?.type === 'error') {
+      const error = response?.error;
+      if (error) {
+        console.log('Google Auth Error:', error);
+        Alert.alert('Erreur de connexion Google', error?.message || 'Une erreur est survenue');
+      }
     }
   }, [response]);
 
+  // Normal login
   const handleLogin = () => {
     const result = login(email, password);
     if (result.success) {
@@ -50,6 +58,7 @@ export default function LoginPage() {
       <Text style={styles.title}>Se connecter</Text>
 
       <View style={styles.form}>
+        {/* Email Input */}
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#999" style={styles.icon} />
           <TextInput
@@ -61,6 +70,7 @@ export default function LoginPage() {
           />
         </View>
 
+        {/* Password Input */}
         <View style={styles.inputContainer}>
           <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
           <TextInput
@@ -80,25 +90,30 @@ export default function LoginPage() {
           </TouchableOpacity>
         </View>
 
+        {/* Forgot password */}
         <TouchableOpacity>
           <Text style={styles.forgot}>Mot de passe oublié?</Text>
         </TouchableOpacity>
 
+        {/* Login button */}
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginText}>Se connecter</Text>
         </TouchableOpacity>
 
+        {/* Register prompt */}
         <Text style={styles.registerPrompt}>
           Vous n’avez pas de compte ?{' '}
           <Link href="/register" style={styles.registerLink}>S'inscrire</Link>
         </Text>
 
+        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.line} />
           <Text style={styles.or}>OU</Text>
           <View style={styles.line} />
         </View>
 
+        {/* Google Login Button */}
         <TouchableOpacity
           style={styles.googleButton}
           disabled={!request}
@@ -114,6 +129,7 @@ export default function LoginPage() {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 24 },
   title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
@@ -159,5 +175,3 @@ const styles = StyleSheet.create({
   googleLogo: { width: 18, height: 18, marginRight: 8 },
   googleText: { fontSize: 15, color: '#333' },
 });
-
-
