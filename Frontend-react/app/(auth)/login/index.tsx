@@ -1,19 +1,15 @@
 import { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  Alert,
-} from 'react-native';
+import { StyleSheet,TextInput,Text,TouchableOpacity,View,Image,Alert, } from 'react-native';
+import { Stack } from "expo-router";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { login } from '@/api/login'; // Adjust this path as needed
+import { login } from '@/api/login'; 
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
+import { Colors } from '@/constants/Colors'; 
+
+const theme = Colors.light; 
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -43,19 +39,32 @@ export default function LoginPage() {
   }, [response]);
 
   // Normal login
-  const handleLogin = () => {
-    const result = login(email, password);
+  const handleLogin = async () => {
+    const result = await login(email, password);
+
     if (result.success) {
       console.log('Logged in:', result.user);
-      router.replace('/home');
+      router.replace({
+        pathname: '/home',
+        params: { email: result.user.email },
+      });
     } else {
-      Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
+      Alert.alert('Erreur', result.message || 'Identifiants invalides');
     }
   };
 
   return (
+    <>
+      <Stack.Screen
+        options={{
+          title: "Se connecter",
+          headerTitleAlign: "center",
+          headerBackTitle: '',
+          headerBackImage: () => <></>,
+        }}
+      />
+
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Se connecter</Text>
 
       <View style={styles.form}>
         {/* Email Input */}
@@ -127,26 +136,28 @@ export default function LoginPage() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
+    </>
+
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 24 },
+  container: { flex: 1, backgroundColor: theme.background, padding: 24 },
   title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
   form: { width: '100%' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F6F6F6',
+    backgroundColor: theme.secondary, 
     borderRadius: 30,
     paddingHorizontal: 15,
     marginBottom: 15,
   },
   icon: { marginRight: 8 },
   input: { flex: 1, height: 50, fontSize: 16 },
-  forgot: { color: '#1AA39D', alignSelf: 'flex-end', marginBottom: 24, fontSize: 14 },
+  forgot: { color: theme.primary, alignSelf: 'flex-end', marginBottom: 24, fontSize: 14 },
   loginButton: {
-    backgroundColor: '#1AA39D',
+    backgroundColor: theme.primary, 
     paddingVertical: 14,
     borderRadius: 30,
     alignItems: 'center',
@@ -154,7 +165,7 @@ const styles = StyleSheet.create({
   },
   loginText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   registerPrompt: { textAlign: 'center', fontSize: 14, marginBottom: 20 },
-  registerLink: { color: '#1AA39D', fontWeight: '500' },
+  registerLink: { color: theme.primary, fontWeight: '500' },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
