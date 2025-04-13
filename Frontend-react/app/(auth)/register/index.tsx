@@ -38,14 +38,14 @@ const Register = () => {
   //     setError({name: "Tout les Donner est Obligatoire"});
   //     showError();
   //     return;}
-  //     apiRegister({name, email, phone, cin, cnt, password}).then((res) => {
-  //       if(res.status === true){
-  //         router.replace("/(auth)/otpPage");
-  //       }else{
-  //         setError({name: res.message});
-  //         showError();
-  //       }
-  //     });
+      // apiRegister({name, email, phone, cin, cnt, password}).then((res) => {
+      //   if(res.status === true){
+      //     router.replace("/(auth)/otpPage");
+      //   }else{
+      //     setError({name: res.message});
+      //     showError();
+      //   }
+      // });
   // }
   const singUp = () => {
     router.replace("/(auth)/otpPage");
@@ -213,7 +213,7 @@ const Register = () => {
             <TouchableOpacity
               style={[
                 styles.registerButton,
-                { backgroundColor: checked ? theme.secondary : "#ccc" },
+                { backgroundColor: checked ? theme.primary : "#ccc" },
               ]}
               onPress={singUp}
             >
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "red",
     position: "absolute",
-    marginTop: "80%",
+    marginTop: "170%",
     marginStart: "35%",
     backgroundColor: "white",
     alignItems: "center",
