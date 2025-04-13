@@ -13,14 +13,7 @@ export default function AccueilPage() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchContainer}>
-        <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Recherche"
-          placeholderTextColor="#999"
-        />
-      </View>
+ 
 
       <View style={styles.selectionContainer}>
         <View style={styles.selectionHeader}>
@@ -64,20 +57,7 @@ export default function AccueilPage() {
         </ScrollView>
       </View>
 
-      <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={24} color="#1AA39D" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="mail-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="calendar-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="person-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-      </View>
+     
     </SafeAreaView>
   );
 }
