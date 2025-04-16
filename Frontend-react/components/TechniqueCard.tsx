@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useRouter } from "expo-router";
 const TechniqueCard = () => {
+  const router = useRouter();
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={() => router.push("/techniquesDetail")}>
       <View style={styles.main}>
         {/*when using data from back end remove require  */}
         <Image
@@ -21,7 +22,7 @@ const TechniqueCard = () => {
           <Text style={styles.subtitle}>Dernière visite en 2 min</Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
