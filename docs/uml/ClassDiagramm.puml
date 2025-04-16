@@ -17,66 +17,104 @@ class Stagiaire {
   id: int
 }
 
-class Laboratoire {
+
+
+
+class Affectation {
+  date:String
+}
+
+
+package "Lab"{
+  class Laboratoire {
   id: int
   titre: String
   image: String
-  adresse: String
-}
-
-class Technique {
+  }
+  class Prérequis {
+      id: int
+      nom: String
+      description: String
+  }
+  class Etape {
+      id: int
+      Titre: String
+      reactive:String
+      duree: int
+      description: String
+  }
+  class Conseil {
+      id: int
+      conseil: String
+      description: String
+  }
+  class Categorie{
+      id: int
+      nom: String
+      description: String
+  }
+  class Technique {
   id: int
   titre: String
   image: String
   description: String
-}
-
-class Prérequis {
-    id: int
-    nom: String
-    description: String
-}
-class Etape {
-    id: int
-    Titre: String
+  }
+  class Etape_conseil
+  {
     duree: int
-    conseil: String
-    description: String
+  }
 }
-class Categorie{
-    id: int
-    nom: String
-    description: String
-}
-class Quiz{
+package "pkg_Quiz" {
+
+  
+
+  class Question{
+      id: int
+      texte:String
+  }
+
+  class Reponse{
+      id: int
+      texte:string
+  }
+  class Option
+  {
+    isCorrect: Boolean
+  }
+
+  class Quiz{
     id: int
     titre: String
     description: String
+  }
 }
 
-class Question{
-    id: int
-    texte:String
-}
 
-class Reponse{
-    id: int
-    texte:string
-}
 
-' relations des utilisateurs(Héritage) : 
+' relations des utilisateurs(Héritage) :
 Utilisateur <|-- Technicien
 Utilisateur <|-- Stagiaire
 
 ' autre relations  :
+Laboratoire "1..1" -- "0..*" Technique
+Technicien "0..*" -- "0..*" Technique : favoris
+Technicien "0..*" -- "0..*" Technique : Démarer
+(Technicien, Technique) . Affectation
+Prérequis "1..*" -- "0..*" Technique
+Technicien "0..*" -- "1..1" Laboratoire
+Categorie "1..1" -- "0..*" Technique
+Etape "1..*" -- "0..*" Technique
+Etape "0..*" -- "1..*" Conseil
+(Etape, Conseil) . Etape_conseil
 
-Laboratoire "1" -- "*" Technique
-Prérequis "*" -- "*" Technique
-Etape "1" -- "*" Technique
-Categorie "1" -- "*" Technique
 ' relations Quiz
-Quiz "1" -- "*" Question
-Question "1" -- "*" Reponse
+Question "0..*" -- "1..1" Quiz
+Question "0..*" -- "0..*" Reponse
+(Question, Reponse) . Option
+
+
+
+
 
 
 @enduml
