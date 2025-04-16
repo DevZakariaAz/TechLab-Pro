@@ -8,8 +8,9 @@ import {
   Image,
   Alert,
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link, useRouter } from 'expo-router';
+import { Link,Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { login } from '@/api/login'; // Adjust this path as needed
 import * as Google from 'expo-auth-session/providers/google';
@@ -55,6 +56,14 @@ export default function LoginPage() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "Se connecter",
+          headerTitleAlign: "center",
+          headerBackVisible: true,
+        }}
+      />
+
       <Text style={styles.title}>Se connecter</Text>
 
       <View style={styles.form}>
