@@ -28,31 +28,63 @@ export default function LoginPage() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '519763398505-f0mjd88o47n1o0otrjv08d61n3hkmr3m.apps.googleusercontent.com',
   });
+const fetchUserProfile = async (accessToken) => {
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const userProfile = await response.json();
+    console.log('User Profile:', userProfile);
+  } catch (error) {
+    console.error('Error fetching user profile:', error);
+  }
+};
 
-  useEffect(() => {
-    if (response?.type === 'success') {
-      const { authentication } = response;
-      console.log('Google Auth Success:', authentication);
+useEffect(() => {
+  if (response?.type === 'success') {
+    const { authentication } = response;
+    const { accessToken } = authentication;
+
+    if (accessToken) {
+      // Store the access token securely
+      console.log('Google Auth Success:', accessToken , );
+
+      // Optionally, fetch the user profile
+      fetchUserProfile(accessToken);
+
+      // Redirect to another page
       router.replace('/(tabs)');
-    } else if (response?.type === 'error') {
-      const error = response?.error;
-      if (error) {
-        console.log('Google Auth Error:', error);
-        Alert.alert('Erreur de connexion Google', error?.message || 'Une erreur est survenue');
-      }
+    } else {
+      Alert.alert('Erreur', 'Token d\'authentification manquant.');
     }
-  }, [response]);
+  } else if (response?.type === 'error') {
+    const error = response?.error;
+    if (error) {
+      console.log('Google Auth Error:', error);
+      Alert.alert('Erreur de connexion Google', error?.message || 'Une erreur est survenue');
+    }
+  }
+}, [response]);
 
   // Normal login
-  const handleLogin = () => {
-    const result = login(email, password);
+// Make handleLogin async to handle the promise correctly
+const handleLogin = async () => {
+  try {
+    const result = await login(email, password);
+
     if (result.success) {
       console.log('Logged in:', result.user);
       router.replace('/(tabs)');
     } else {
-      Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
+      Alert.alert('Erreur', result.message || 'Email ou mot de passe incorrect.');
     }
-  };
+  } catch (error) {
+    console.error('Login failed:', error);
+    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion.');
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -64,10 +96,9 @@ export default function LoginPage() {
         }}
       />
 
-      <Text style={styles.title}>Se connecter</Text>
-
       <View style={styles.form}>
         {/* Email Input */}
+        <Text style={styles.title}>Entrez votre email et mot de passe pour vous connecter.</Text>
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#999" style={styles.icon} />
           <TextInput

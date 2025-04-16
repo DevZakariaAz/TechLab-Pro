@@ -24,7 +24,7 @@ const STAINING_TECHNIQUES = [
     description: 'Coloration standard pour visualiser les structures cellulaires. Le noyau apparaît en bleu-violet et le cytoplasme en rose.',
     lastActivity: '2 min',
     isFavorite: true,
-    image: require('@/assets/images/Technique1.png')
+    image: require('@/assets/images/Technique2.png')
   },
   {
     id: '2',
@@ -33,7 +33,7 @@ const STAINING_TECHNIQUES = [
     description: 'Utilisée pour différencier les fibres de collagène du muscle lisse. Le collagène apparaît en bleu, les noyaux en noir et le cytoplasme en rouge.',
     lastActivity: '15 min',
     isFavorite: true,
-    image: require('@/assets/images/Technique1.png')
+    image: require('@/assets/images/technique.png')
   },
   {
     id: '3',
@@ -51,7 +51,7 @@ const STAINING_TECHNIQUES = [
     description: 'Utilisée pour différencier le collagène du muscle lisse. Le collagène apparaît en rouge et le muscle en jaune.',
     lastActivity: '25 min',
     isFavorite: false,
-    image: require('@/assets/images/Technique1.png')
+    image: require('@/assets/images/Technique2.png')
   },
   {
     id: '5',
@@ -60,7 +60,7 @@ const STAINING_TECHNIQUES = [
     description: 'Différencie les bactéries Gram positif (violet) des bactéries Gram négatif (rose).',
     lastActivity: '30 min',
     isFavorite: false,
-    image: require('@/assets/images/Technique1.png')
+    image: require('@/assets/images/technique.png')
   },
   {
     id: '6',
@@ -81,8 +81,7 @@ const CATEGORIES = [
   { id: 'microbiologiques', name: 'Microbiologiques' },
 ];
 
-// This is the screen component you can add to your existing navigation
-const StainingTechniquesScreen = ({ navigation }) => {
+const StainingTechniquesApp = () => {
   const colorScheme = useColorScheme() || 'light';
   const colors = Colors[colorScheme];
   
@@ -115,12 +114,11 @@ const StainingTechniquesScreen = ({ navigation }) => {
         borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
       }]}
       activeOpacity={0.9}
-      onPress={() => console.log(`View technique ${item.id}`)}
     >
       <Image
-          source={item.image} // Remove the { uri: ... } wrapper
-          style={styles.cardImage}
-          resizeMode="cover"
+        source={item.image} 
+        style={styles.cardImage}
+        resizeMode="cover"
       />
       <View style={styles.cardOverlay}>
         <TouchableOpacity 
@@ -160,7 +158,6 @@ const StainingTechniquesScreen = ({ navigation }) => {
           
           <TouchableOpacity 
             style={[styles.viewButton, { backgroundColor: Colors.lightGreen }]}
-            onPress={() => console.log(`View technique ${item.id}`)}
           >
             <Text style={styles.viewButtonText}>Voir</Text>
           </TouchableOpacity>
@@ -173,59 +170,74 @@ const StainingTechniquesScreen = ({ navigation }) => {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'} />
       
-      {/* Search Bar */}
-      <View style={[styles.searchContainer, { 
-        backgroundColor: colorScheme === 'dark' ? colors.secondary : '#f5f5f5',
-        borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
-      }]}>
-        <Ionicons name="search" size={20} color={colors.icon} />
-        <TextInput
-          style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Rechercher une technique..."
-          placeholderTextColor={colors.icon}
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery !== '' && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Ionicons name="close-circle" size={20} color={colors.icon} />
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <TouchableOpacity style={styles.backButton}>
+            <Ionicons name="chevron-back" size={24} color={colors.text} />
           </TouchableOpacity>
-        )}
-      </View>
-      
-      {/* Category Filters */}
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryContainer}
-      >
-        {CATEGORIES.map(category => (
-          <TouchableOpacity
-            key={category.id}
-            style={[
-              styles.categoryButton,
-              activeCategory === category.id && { 
-                backgroundColor: Colors.lightGreen,
-                borderColor: Colors.lightGreen
-              },
-              activeCategory !== category.id && { 
-                borderColor: colors.icon,
-                backgroundColor: 'transparent' 
-              }
-            ]}
-            onPress={() => setActiveCategory(category.id)}
-          >
-            <Text
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Techniques de Coloration
+          </Text>
+          <TouchableOpacity style={styles.menuButton}>
+            <Feather name="more-vertical" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
+        
+        {/* Search Bar */}
+        <View style={[styles.searchContainer, { 
+          backgroundColor: colorScheme === 'dark' ? colors.secondary : '#f5f5f5',
+          borderColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
+        }]}>
+          <Ionicons name="search" size={20} color={colors.icon} />
+          <TextInput
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholder="Rechercher une technique..."
+            placeholderTextColor={colors.icon}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery !== '' && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={20} color={colors.icon} />
+            </TouchableOpacity>
+          )}
+        </View>
+        
+        {/* Category Filters */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.categoryContainer}
+        >
+          {CATEGORIES.map(category => (
+            <TouchableOpacity
+              key={category.id}
               style={[
-                styles.categoryButtonText,
-                { color: activeCategory === category.id ? '#fff' : colors.icon }
+                styles.categoryButton,
+                activeCategory === category.id && { 
+                  backgroundColor: Colors.lightGreen,
+                  borderColor: Colors.lightGreen
+                },
+                activeCategory !== category.id && { 
+                  borderColor: colors.icon,
+                  backgroundColor: 'transparent' 
+                }
               ]}
+              onPress={() => setActiveCategory(category.id)}
             >
-              {category.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  { color: activeCategory === category.id ? '#fff' : colors.icon }
+                ]}
+              >
+                {category.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
 
       {/* Techniques List */}
       <FlatList
@@ -277,6 +289,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    paddingTop: 10,
+    paddingHorizontal: 16,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -284,7 +322,7 @@ const styles = StyleSheet.create({
     height: 46,
     borderRadius: 12,
     borderWidth: 1,
-    margin: 16,
+    marginBottom: 16,
   },
   searchInput: {
     flex: 1,
@@ -292,25 +330,11 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
   },
-  searchAndFilterContainer: {
-  zIndex: 10, // Higher z-index to ensure filters appear above content
-  backgroundColor: 'transparent',
-  },
-
   categoryContainer: {
-  paddingHorizontal: 16,
-  paddingBottom: 16,
-  flexDirection: 'row',
-  gap: 8,
-  zIndex: 5, // Add z-index
+    paddingBottom: 16,
+    flexDirection: 'row',
+    gap: 8,
   },
-
-  listContainer: {
-  padding: 16,
-  paddingBottom: 100,
-  zIndex: 1, // Lower z-index
-  },
-
   categoryButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -434,4 +458,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StainingTechniquesScreen;
+export default StainingTechniquesApp;
