@@ -9,7 +9,6 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
-
     // Custom colors
     primary: '#1AA39D', // Same as your loginButton color
     secondary: '#F6F6F6', // For input background or highlights
@@ -26,4 +25,5 @@ export const Colors = {
     primary: '#1AA39D',
     secondary: '#333333',
   },
+  lightGreen:"#199A8E"
 };

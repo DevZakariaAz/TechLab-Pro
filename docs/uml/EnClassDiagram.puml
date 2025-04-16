@@ -1,0 +1,84 @@
+@startuml
+
+class User {
+    id: int
+    lastName: String
+    firstName: String
+    email: String
+    password: String
+    phone: String
+}
+
+class Technician {
+    id: int
+}
+
+class Intern {
+    id: int
+}
+
+class Laboratory {
+    id: int
+    title: String
+    image: String
+    address: String
+}
+
+class Technique {
+    id: int
+    title: String
+    image: String
+    description: String
+}
+
+class Prerequisite {
+    id: int
+    name: String
+    description: String
+}
+
+class Step {
+    id: int
+    title: String
+    duration: int
+    advice: String
+    description: String
+}
+
+class Category {
+    id: int
+    name: String
+    description: String
+}
+
+class Quiz {
+    id: int
+    title: String
+    description: String
+}
+
+class Question {
+    id: int
+    text: String
+}
+
+class Answer {
+    id: int
+    text: String
+}
+
+' Inheritance relations (User hierarchy)
+User <|-- Technician
+User <|-- Intern
+
+' Other relationships
+Laboratory "1" -- "*" Technique
+Prerequisite "*" -- "*" Technique
+Step "1" -- "*" Technique
+Category "1" -- "*" Technique
+
+' Quiz relationships
+Quiz "1" -- "*" Question
+Question "1" -- "*" Answer
+
+@enduml

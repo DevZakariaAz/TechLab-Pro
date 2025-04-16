@@ -1,0 +1,82 @@
+@startuml
+
+
+class Utilisateur {
+    id: int
+    nom: String
+    prenom: String
+    email: String
+    password: String
+    telephone: String
+}
+
+class Technicien {
+  id: int
+}
+class Stagiaire {
+  id: int
+}
+
+class Laboratoire {
+  id: int
+  titre: String
+  image: String
+  adresse: String
+}
+
+class Technique {
+  id: int
+  titre: String
+  image: String
+  description: String
+}
+
+class Prérequis {
+    id: int
+    nom: String
+    description: String
+}
+class Etape {
+    id: int
+    Titre: String
+    duree: int
+    conseil: String
+    description: String
+}
+class Categorie{
+    id: int
+    nom: String
+    description: String
+}
+class Quiz{
+    id: int
+    titre: String
+    description: String
+}
+
+class Question{
+    id: int
+    texte:String
+}
+
+class Reponse{
+    id: int
+    texte:string
+}
+
+' relations des utilisateurs(Héritage) : 
+Utilisateur <|-- Technicien
+Utilisateur <|-- Stagiaire
+
+' autre relations  :
+
+Laboratoire "1" -- "*" Technique
+Prérequis "*" -- "*" Technique
+Etape "1" -- "*" Technique
+Categorie "1" -- "*" Technique
+' relations Quiz
+Quiz "1" -- "*" Question
+Question "1" -- "*" Reponse
+
+
+@enduml

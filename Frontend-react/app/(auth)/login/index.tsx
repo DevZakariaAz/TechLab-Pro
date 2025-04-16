@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet,TextInput,Text,TouchableOpacity,View,Image,Alert, } from 'react-native';
-import { Stack } from "expo-router";
+import {
+  StyleSheet,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  View,
+  Image,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { login } from '@/api/login'; 
+import { login } from '@/api/login'; // Adjust this path as needed
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import { Colors } from '@/constants/Colors'; 
-
-const theme = Colors.light; 
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -28,7 +32,7 @@ export default function LoginPage() {
     if (response?.type === 'success') {
       const { authentication } = response;
       console.log('Google Auth Success:', authentication);
-      router.replace('/home');
+      router.replace('/(tabs)');
     } else if (response?.type === 'error') {
       const error = response?.error;
       if (error) {
@@ -39,32 +43,19 @@ export default function LoginPage() {
   }, [response]);
 
   // Normal login
-  const handleLogin = async () => {
-    const result = await login(email, password);
-
+  const handleLogin = () => {
+    const result = login(email, password);
     if (result.success) {
       console.log('Logged in:', result.user);
-      router.replace({
-        pathname: '/home',
-        params: { email: result.user.email },
-      });
+      router.replace('/(tabs)');
     } else {
-      Alert.alert('Erreur', result.message || 'Identifiants invalides');
+      Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
     }
   };
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "Se connecter",
-          headerTitleAlign: "center",
-          headerBackTitle: '',
-          headerBackImage: () => <></>,
-        }}
-      />
-
     <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Se connecter</Text>
 
       <View style={styles.form}>
         {/* Email Input */}
@@ -136,28 +127,26 @@ export default function LoginPage() {
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-    </>
-
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.background, padding: 24 },
+  container: { flex: 1, backgroundColor: '#fff', padding: 24 },
   title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
   form: { width: '100%' },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.secondary, 
+    backgroundColor: '#F6F6F6',
     borderRadius: 30,
     paddingHorizontal: 15,
     marginBottom: 15,
   },
   icon: { marginRight: 8 },
   input: { flex: 1, height: 50, fontSize: 16 },
-  forgot: { color: theme.primary, alignSelf: 'flex-end', marginBottom: 24, fontSize: 14 },
+  forgot: { color: '#1AA39D', alignSelf: 'flex-end', marginBottom: 24, fontSize: 14 },
   loginButton: {
-    backgroundColor: theme.primary, 
+    backgroundColor: '#1AA39D',
     paddingVertical: 14,
     borderRadius: 30,
     alignItems: 'center',
@@ -165,7 +154,7 @@ const styles = StyleSheet.create({
   },
   loginText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   registerPrompt: { textAlign: 'center', fontSize: 14, marginBottom: 20 },
-  registerLink: { color: theme.primary, fontWeight: '500' },
+  registerLink: { color: '#1AA39D', fontWeight: '500' },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
