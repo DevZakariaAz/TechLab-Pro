@@ -32,7 +32,7 @@ export default function LoginPage() {
     if (response?.type === 'success') {
       const { authentication } = response;
       console.log('Google Auth Success:', authentication);
-      router.replace('/home');
+      router.replace('/(tabs)');
     } else if (response?.type === 'error') {
       const error = response?.error;
       if (error) {
@@ -47,7 +47,7 @@ export default function LoginPage() {
     const result = login(email, password);
     if (result.success) {
       console.log('Logged in:', result.user);
-      router.replace('/home');
+      router.replace('/(tabs)');
     } else {
       Alert.alert('Erreur', 'Email ou mot de passe incorrect.');
     }

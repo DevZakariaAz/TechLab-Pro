@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useRef } from "react";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { Colors } from "../../../constants/Colors";
 import OTPTextView from "react-native-otp-textinput";
 
 const theme = Colors.light;
 const OtpPage = () => {
   const otpRef = useRef(null);
+  const router = useRouter();
   return (
     <>
       <Stack.Screen
@@ -36,7 +37,7 @@ const OtpPage = () => {
               ref={otpRef}
               textInputStyle={{
                 borderWidth: 1,
-                borderColor: theme.secondary,
+                borderColor: theme.primary,
                 width: 50,
                 height: 50,
                 borderRadius: 10,
@@ -44,7 +45,10 @@ const OtpPage = () => {
             />
           </View>
           <View style={{flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-            <TouchableOpacity style={styles.verifyButton}>
+            <TouchableOpacity 
+              style={styles.verifyButton}
+              onPress={() => router.push("/(tabs)")}
+            >
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
                 Vérifier
               </Text>
@@ -52,6 +56,7 @@ const OtpPage = () => {
             <Text>
               Vous n'avez pas reçu le code ?{" "}
               <TouchableOpacity
+                onPress={() => {router.navigate("/(tabs)")}}
                 style={{
                   display: "flex",
                   padding: 0,
@@ -111,6 +116,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: theme.secondary,
+    backgroundColor: theme.primary,
   },
 });
