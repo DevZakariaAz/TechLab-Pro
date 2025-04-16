@@ -9,19 +9,19 @@ import {
   StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Stack } from 'expo-router';
 
-export default function ProtocolDetailScreen() {
+export default function stepsList() {
   return (
+    <>
+    <Stack.Screen options={{
+      headerShown: true,
+      headerTitleAlign: "center",
+      headerTitle: "Instructions Détaillées",
+      headerBackVisible: true,
+    }} />
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Instructions Détaillées</Text>
-        <View style={styles.headerRight} />
-      </View>
       
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Hématoxyline-Éosine (H&E)</Text>
@@ -181,13 +181,15 @@ export default function ProtocolDetailScreen() {
       </ScrollView>
 
     </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F7',
+    backgroundColor: "white",
+    paddingTop: 20,
   },
   header: {
     flexDirection: 'row',
