@@ -6,7 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Controller;
+use App\Otp\UserRegistrationOtp;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Validator;
+use SadiqSalau\LaravelOtp\Facades\Otp;
 
 class AuthController extends Controller
 {
@@ -27,20 +30,31 @@ class AuthController extends Controller
                         'errors' => $validateUser->errors(),
                     ], 422);
             }
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-            ]);
-            $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json(
-                [
-                    'status' =>true,
-                    'message' => 'utilisateur créé avec succès',
-                    'token' => $token,
-                    'user' => $user,
-                ]
-            ,200);
+            // $user = User::create([
+            //     'name' => $request->name,
+            //     'email' => $request->email,
+            //     'password' => Hash::make($request->password),
+            // ]);
+            // $token = $user->createToken('auth_token')->plainTextToken;
+            // return response()->json(
+            //     [
+            //         'status' =>true,
+            //         'message' => 'utilisateur créé avec succès',
+            //         'token' => $token,
+            //         'user' => $user,
+            //     ]
+            // ,200);
+
+            $otp = Otp::identifier($request->email)->send(
+                new UserRegistrationOtp(
+                    name: $request->name,
+                    email: $request->email,
+                    password: $request->password
+                ),
+                Notification::route('mail', $request->email)
+            );
+        
+            return __($otp['status']);
         }
         catch (\Exception $error) {
             return response()->json(
@@ -49,6 +63,23 @@ class AuthController extends Controller
                     'message' => $error->getMessage()
                 ],422);
         }
+    }
+
+    public function otpVerify(Request $request) {
+
+        $request->validate([
+            'email'    => ['required', 'string', 'email', 'max:255'],
+            'code'     => ['required', 'string']
+        ]);
+    
+        $otp = Otp::identifier($request->email)->attempt($request->code);
+    
+        if($otp['status'] != Otp::OTP_PROCESSED)
+        {
+            abort(403, __($otp['status']));
+        }
+    
+        return $otp['result'];
     }
 
     // Connexion d'un utilisateur
