@@ -27,6 +27,7 @@ export default function AccueilPage() {
                   name="notifications-outline"
                   size={24}
                   color="black"
+                  onclick={() => {router.push('/notifications')}}
                 />
                 <View style={styles.notificationBadge} />
               </TouchableOpacity>
@@ -35,9 +36,6 @@ export default function AccueilPage() {
         }}
       />
       <SafeAreaView style={styles.container}>
-        {/* <View style={styles.header}>
-          <Text style={styles.headerTitle}>Accueil</Text>
-        </View> */}
 
         <View style={[styles.searchContainer, {marginTop: 30}]}>
           <Ionicons
@@ -71,7 +69,7 @@ export default function AccueilPage() {
                 <Text style={styles.labName}>Anatomopathologique</Text>
               </View>
               <Image
-                source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // Replace with your microscope image
+                source={require('@/assets/images/lab1.png')}
                 style={styles.labImage}
               />
             </TouchableOpacity>
@@ -82,7 +80,7 @@ export default function AccueilPage() {
                 <Text style={styles.labName}>de Cytologie Pathologique</Text>
               </View>
               <Image
-                source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // Replace with your document/screen image
+                source={require('@/assets/images/lab2.png')}
                 style={styles.labImage}
               />
             </TouchableOpacity>
@@ -93,28 +91,12 @@ export default function AccueilPage() {
                 <Text style={styles.labName}>et Cytodiagnostic</Text>
               </View>
               <Image
-                source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }} // Replace with your test tubes image
+                source={require('@/assets/images/lab3.png')}
                 style={styles.labImage}
               />
             </TouchableOpacity>
           </ScrollView>
         </View>
-
-        {/*removed tab bar becuse it will be done by (tabbs) file*/}
-        {/* <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={24} color="#1AA39D" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="mail-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="calendar-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="person-outline" size={24} color="#ccc" />
-        </TouchableOpacity>
-      </View> */}
       </SafeAreaView>
     </>
   );

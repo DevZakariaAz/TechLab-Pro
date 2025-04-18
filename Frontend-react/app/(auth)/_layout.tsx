@@ -28,6 +28,20 @@ const _layout = () => {
           headerTitleAlign: "center",
         }}
       />
+      <Stack.Screen
+        name="resetPassword"
+        options={{
+          title: "Réinitialiser le mot de passe",
+          headerTitleAlign: "center",
+        }}
+      />
+      <Stack.Screen
+        name="newPassword"
+        options={{
+          title: "Nouveau mot de passe",
+          headerTitleAlign: "center",
+        }}
+      />
     </Stack>
   );
 };

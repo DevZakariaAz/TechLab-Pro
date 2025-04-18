@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculateur de dilution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            background: #f4f4f4;
+        }
+    
+        input,
+        select,
+        button {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+    
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    
+        button:hover {
+            background-color: #0056b3;
+        }
+    
+        h1,
+        h2 {
+            text-align: center;
+        }
+    
+        #historique {
+            background-color: white;
+            padding: 10px;
+            border-radius: 6px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h1>Calcul C1V1 = C2V2</h1>
+
+    <label>C1 (concentration initiale) :</label>
+    <input type="number" id="c1"><br>
+
+    <label>V1 (volume initial) :</label>
+    <input type="number" id="v1"><br>
+
+    <label>C2 (concentration finale) :</label>
+    <input type="number" id="c2"><br>
+
+    <label>V2 (volume final) :</label>
+    <input type="number" id="v2"><br>
+    <!-- Ajout d'un sélecteur d'unités -->
+    <label>Unité de concentration :</label>
+    <select id="uniteConcentration">
+        <option value="mg/mL">mg/mL</option>
+        <option value="g/L">g/L</option>
+        <option value="%">%</option>
+    </select><br>
+
+    <label>Unité de volume :</label>
+    <select id="uniteVolume">
+        <option value="mL">mL</option>
+        <option value="µL">µL</option>
+        <option value="L">L</option>
+    </select><br>
+
+    <button onclick="calculer()">Calculer</button>
+
+    <p id="resultat"></p>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
