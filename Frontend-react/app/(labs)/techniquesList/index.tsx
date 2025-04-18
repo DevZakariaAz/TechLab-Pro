@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "expo-router"
+import { useRouter,Stack } from "expo-router"
 import { getTechniques } from "../../../api/getTechniques"
 import {
   View,
@@ -37,20 +37,19 @@ const StainingTechniquesApp = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchTechniques = async () => {
-      const result = await getTechniques()
-
-      if (result.success) {
-        setTechniques(result.techniques)
-      } else {
-        console.warn(result.message)
-      }
-      setLoading(false)
+useEffect(() => {
+  const fetchTechniques = async () => {
+    const result = await getTechniques();
+    if (result.success) {
+      setTechniques(result.techniques);
+    } else {
+      console.error(result.message);
     }
+    setLoading(false);
+  };
 
-    fetchTechniques()
-  }, [])
+  fetchTechniques();
+}, []);
 
   const filteredTechniques = techniques.filter((technique) => {
     const matchesCategory = activeCategory === "all" || technique.category.includes(activeCategory)
@@ -110,13 +109,29 @@ const StainingTechniquesApp = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={colorScheme === "dark" ? "light-content" : "dark-content"} />
+      <Stack.Screen
+        options={{
+          title: "Accueil",
+          headerTitleAlign: "center",
+          headerBackVisible: true,
+          headerRight: () => (
+            <>
+              <TouchableOpacity style={styles.settingsButton}>
+                <Ionicons
+                  name="options-outline"
+                  size={24}
+                  color={colors.text}
+                  onclick={() => {router.push('/Settings')}}
+                />
+              </TouchableOpacity>
+            </>
+          ),
+        }}
+      />
 
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Techniques de Coloration</Text>
-          <TouchableOpacity style={styles.settingsButton}>
-            <Ionicons name="options-outline" size={22} color={colors.text} />
-          </TouchableOpacity>
         </View>
 
         <View
