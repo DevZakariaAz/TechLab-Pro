@@ -131,9 +131,10 @@ const handleLogin = async () => {
         </View>
 
         {/* Forgot password */}
-        <TouchableOpacity>
-          <Text style={styles.forgot}>Mot de passe oublié?</Text>
-        </TouchableOpacity>
+        {/* Forgot password */}
+      <Link href="/resetPassword">
+        <Text style={styles.forgot}>Mot de passe oublié?</Text>
+      </Link>
 
         {/* Login button */}
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
