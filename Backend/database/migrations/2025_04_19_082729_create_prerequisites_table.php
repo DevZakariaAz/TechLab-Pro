@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('techniques', function (Blueprint $table) {
+        Schema::create('prerequisites', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->string('subtitle');
+            $table->string('name');
             $table->string('description');
-            $table->integer('rate');
-            $table->date('completed');
-            $table->string('image');
             $table->timestamps();
         });
     }
@@ -28,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('techniques');
+        Schema::dropIfExists('prerequisites');
     }
 };

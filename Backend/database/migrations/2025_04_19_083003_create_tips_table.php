@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('tips', function (Blueprint $table) {
             $table->id();
-            $table->string('content');
+            $table->string('tip');
+            $table->string('description');
             $table->timestamps();
         });
     }

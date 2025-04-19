@@ -8,6 +8,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Pkg_Lab\Technique;
+use App\Models\Pkg_Lab\Laboratory;
+
 
 class User extends Authenticatable
 {
@@ -23,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'laboratory_id',
     ];
 
     /**
@@ -46,5 +50,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function assignmentTechniques()
+    {
+        return $this->belongsToMany(Technique::class,'assignments')
+            ->withTimestamps();
+    }
+    public function favoriteTechniques()
+    {
+        return $this->belongsToMany(Technique::class, 'favorites');
+    }
+    public function laboratory()
+    {
+        return $this->belongsTo(Laboratory::class);
     }
 }
