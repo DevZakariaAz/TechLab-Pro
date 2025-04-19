@@ -18,7 +18,7 @@ const OtpPage = () => {
     <>
       <Stack.Screen
         options={{
-          title: "S'inscrire",
+          title: "Verification",
           headerBackVisible: false,
           headerTitleAlign: "center",
         }}
@@ -47,7 +47,7 @@ const OtpPage = () => {
           <View style={{flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
             <TouchableOpacity 
               style={styles.verifyButton}
-              onPress={() => router.push("/(tabs)")}
+              onPress={() => router.push("/newPassword")}
             >
               <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
                 Vérifier
