@@ -18,6 +18,7 @@ class RolesSeeder extends Seeder
         $admin = User::create([
             'name' => 'Zakaria Azizi',
             'email' => 'zeko@azizi.com',
+            'laboratory_id' => 1,
             'password' => bcrypt('123456'),
         ]);
         $admin->assignRole($adminRole);

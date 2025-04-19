@@ -12,73 +12,95 @@ class User {
 class Technician {
     id: int
 }
-
 class Intern {
     id: int
 }
 
-class Laboratory {
-    id: int
-    title: String
-    image: String
-    address: String
+class Assignment {
+    date: String
 }
 
-class Technique {
+package "Lab" {
+  class Laboratory {
     id: int
     title: String
-    image: String
     description: String
-}
-
-class Prerequisite {
+    image: String
+  }
+  class Prerequisite {
     id: int
     name: String
     description: String
-}
-
-class Step {
+  }
+  class Step {
     id: int
     title: String
+    reactive: String
     duration: int
-    advice: String
     description: String
-}
-
-class Category {
+  }
+  class Tip {
+    id: int
+    tip: String
+    description: String
+  }
+  class Category {
     id: int
     name: String
     description: String
+  }
+  class Technique {
+    id: int
+    title: String
+    image: String
+    description: String
+  }
+  class Step_Tip {
+    duration: int
+  }
 }
 
-class Quiz {
+package "pkg_Quiz" {
+  class Question {
+    id: int
+    text: String
+  }
+
+  class Answer {
+    id: int
+    text: String
+  }
+  
+  class Option {
+    isCorrect: Boolean
+  }
+
+  class Quiz {
     id: int
     title: String
     description: String
+  }
 }
 
-class Question {
-    id: int
-    text: String
-}
-
-class Answer {
-    id: int
-    text: String
-}
-
-' Inheritance relations (User hierarchy)
+' user relationships (Inheritance):
 User <|-- Technician
 User <|-- Intern
 
-' Other relationships
-Laboratory "1" -- "*" Technique
-Prerequisite "*" -- "*" Technique
-Step "1" -- "*" Technique
-Category "1" -- "*" Technique
+' other relationships:
+Laboratory "1..1" -- "0..*" Technique
+Technician "0..*" -- "0..*" Technique : favorites
+Technician "0..*" -- "0..*" Technique : Start
+(Technician, Technique) . Assignment
+Prerequisite "1..*" -- "0..*" Technique
+Technician "0..*" -- "1..1" Laboratory
+Category "1..1" -- "0..*" Technique
+Step "1..*" -- "0..*" Technique
+Step "0..*" -- "1..*" Tip
+(Step, Tip) . Step_Tip
 
-' Quiz relationships
-Quiz "1" -- "*" Question
-Question "1" -- "*" Answer
+' Quiz relationships:
+Question "0..*" -- "1..1" Quiz
+Question "0..*" -- "0..*" Answer
+(Question, Answer) . Option
 
 @enduml
