@@ -18,6 +18,7 @@ class AuthController extends Controller
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|min:6',
+                'laboratory_id' => 'required|exists:laboratories,id',
             ]);
             if ($validateUser->fails()) {
                 return response()->json(
