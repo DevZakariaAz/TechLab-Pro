@@ -10,6 +10,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Pkg_Lab\Technique;
 use App\Models\Pkg_Lab\Laboratory;
+use App\Notifications\ResetPasswordNotification;
 
 
 class User extends Authenticatable
@@ -50,6 +51,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
     }
 
     public function assignmentTechniques()
