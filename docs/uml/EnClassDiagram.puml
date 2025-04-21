@@ -1,0 +1,106 @@
+@startuml
+
+class User {
+    id: int
+    lastName: String
+    firstName: String
+    email: String
+    password: String
+    phone: String
+}
+
+class Technician {
+    id: int
+}
+class Intern {
+    id: int
+}
+
+class Assignment {
+    date: String
+}
+
+package "Lab" {
+  class Laboratory {
+    id: int
+    title: String
+    description: String
+    image: String
+  }
+  class Prerequisite {
+    id: int
+    name: String
+    description: String
+  }
+  class Step {
+    id: int
+    title: String
+    reactive: String
+    duration: int
+    description: String
+  }
+  class Tip {
+    id: int
+    tip: String
+    description: String
+  }
+  class Category {
+    id: int
+    name: String
+    description: String
+  }
+  class Technique {
+    id: int
+    title: String
+    image: String
+    description: String
+  }
+  class Step_Tip {
+    duration: int
+  }
+}
+
+package "pkg_Quiz" {
+  class Question {
+    id: int
+    text: String
+  }
+
+  class Answer {
+    id: int
+    text: String
+  }
+  
+  class Option {
+    isCorrect: Boolean
+  }
+
+  class Quiz {
+    id: int
+    title: String
+    description: String
+  }
+}
+
+' user relationships (Inheritance):
+User <|-- Technician
+User <|-- Intern
+
+' other relationships:
+Laboratory "1..1" -- "0..*" Technique
+Technician "0..*" -- "0..*" Technique : favorites
+Technician "0..*" -- "0..*" Technique : Start
+(Technician, Technique) . Assignment
+Prerequisite "1..*" -- "0..*" Technique
+Technician "0..*" -- "1..1" Laboratory
+Category "1..1" -- "0..*" Technique
+Step "1..*" -- "0..*" Technique
+Step "0..*" -- "1..*" Tip
+(Step, Tip) . Step_Tip
+
+' Quiz relationships:
+Question "0..*" -- "1..1" Quiz
+Question "0..*" -- "0..*" Answer
+(Question, Answer) . Option
+
+@enduml

@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "TechLab",
+    "slug": "TechLab-Pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/microscope.png",
+    "scheme": "techlab",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.zakaria.techlab",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to your photo library."
+      }
+    },
+    "android": {
+      "package": "com.zakaria.techlab",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/microscope.png",
+        "backgroundColor": "#00FF00"
+      },
+      "permissions": [
+        "CAMERA",
+        "PHOTO_LIBRARY"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/microscope.png",
+      "meta": {
+        "description": "TechLab: Your Intelligent Lab Assistant",
+        "themeColor": "#00FF00"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#00FF00",
+          "imageWidth": 200
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "redirectUri": "https://auth.expo.io/@Zakaria/TechLab"
+    },
+    "assets": [
+      "./assets/images/*"
+    ],
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "description": "TechLab is an intelligent laboratory assistant app that helps streamline laboratory tasks."
+  }
+}
