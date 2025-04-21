@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/test', function(){return ['message' => 'Good Admin'];})->middleware(['auth:sanctum', 'role:admin']);
 
 
