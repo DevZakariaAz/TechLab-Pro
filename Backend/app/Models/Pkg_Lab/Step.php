@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Step extends Model
 {
+    protected $fillable = ['title','reactive','duration','description'];
     public function techniques()
     {
         return $this->belongsToMany(Technique::class, 'step_technique');
