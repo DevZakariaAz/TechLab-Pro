@@ -10,9 +10,9 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link,Stack, useRouter } from 'expo-router';
+import { Link, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { login } from '@/api/login'; // Adjust this path as needed
+import { login } from '@/api/login'; // Make sure this path is correct
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 
@@ -28,77 +28,70 @@ export default function LoginPage() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: '519763398505-f0mjd88o47n1o0otrjv08d61n3hkmr3m.apps.googleusercontent.com',
   });
-const fetchUserProfile = async (accessToken) => {
-  try {
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const userProfile = await response.json();
-    console.log('User Profile:', userProfile);
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-  }
-};
 
-useEffect(() => {
-  if (response?.type === 'success') {
-    const { authentication } = response;
-    const { accessToken } = authentication;
-
-    if (accessToken) {
-      // Store the access token securely
-      console.log('Google Auth Success:', accessToken , );
-
-      // Optionally, fetch the user profile
-      fetchUserProfile(accessToken);
-
-      // Redirect to another page
-      router.replace('/(tabs)');
-    } else {
-      Alert.alert('Erreur', 'Token d\'authentification manquant.');
+  const fetchUserProfile = async (accessToken) => {
+    try {
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const userProfile = await res.json();
+      console.log('User Profile:', userProfile);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
     }
-  } else if (response?.type === 'error') {
-    const error = response?.error;
-    if (error) {
-      console.log('Google Auth Error:', error);
-      Alert.alert('Erreur de connexion Google', error?.message || 'Une erreur est survenue');
-    }
-  }
-}, [response]);
+  };
 
-  // Normal login
-// Make handleLogin async to handle the promise correctly
-const handleLogin = async () => {
-  try {
-    const result = await login(email, password);
+  useEffect(() => {
+    if (!response) return;
 
-    if (result.success) {
-      console.log('Logged in:', result.user);
-      router.replace('/(tabs)');
-    } else {
-      Alert.alert('Erreur', result.message || 'Email ou mot de passe incorrect.');
+    if (response.type === 'success') {
+      const { authentication } = response;
+      const accessToken = authentication?.accessToken;
+
+      if (accessToken) {
+        console.log('Google Auth Success:', accessToken);
+        fetchUserProfile(accessToken);
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Erreur', 'Token d\'authentification manquant.');
+      }
+    } else if (response.type === 'error') {
+      Alert.alert('Erreur Google', response.error?.message || 'Une erreur est survenue');
     }
-  } catch (error) {
-    console.error('Login failed:', error);
-    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion.');
-  }
-};
+  }, [response]);
+
+  const handleLogin = async () => {
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        console.log('Logged in:', result.user);
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Erreur', result.message || 'Email ou mot de passe incorrect.');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Stack.Screen
         options={{
-          title: "Se connecter",
-          headerTitleAlign: "center",
+          title: 'Se connecter',
+          headerTitleAlign: 'center',
           headerBackVisible: true,
         }}
       />
 
       <View style={styles.form}>
-        {/* Email Input */}
-        <Text style={styles.title}>Entrez votre email et mot de passe pour vous connecter.</Text>
+        <Text style={styles.title}>
+          Entrez votre email et mot de passe pour vous connecter.
+        </Text>
+
         <View style={styles.inputContainer}>
           <Ionicons name="mail-outline" size={20} color="#999" style={styles.icon} />
           <TextInput
@@ -110,7 +103,6 @@ const handleLogin = async () => {
           />
         </View>
 
-        {/* Password Input */}
         <View style={styles.inputContainer}>
           <Ionicons name="lock-closed-outline" size={20} color="#999" style={styles.icon} />
           <TextInput
@@ -130,31 +122,27 @@ const handleLogin = async () => {
           </TouchableOpacity>
         </View>
 
-        {/* Forgot password */}
-        {/* Forgot password */}
-      <Link href="/resetPassword">
-        <Text style={styles.forgot}>Mot de passe oublié?</Text>
-      </Link>
+        <Link href="/resetPassword">
+          <Text style={styles.forgot}>Mot de passe oublié?</Text>
+        </Link>
 
-        {/* Login button */}
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginText}>Se connecter</Text>
         </TouchableOpacity>
 
-        {/* Register prompt */}
         <Text style={styles.registerPrompt}>
           Vous n’avez pas de compte ?{' '}
-          <Link href="/register" style={styles.registerLink}>S'inscrire</Link>
+          <Link href="/register" style={styles.registerLink}>
+            S'inscrire
+          </Link>
         </Text>
 
-        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.line} />
           <Text style={styles.or}>OU</Text>
           <View style={styles.line} />
         </View>
 
-        {/* Google Login Button */}
         <TouchableOpacity
           style={styles.googleButton}
           disabled={!request}

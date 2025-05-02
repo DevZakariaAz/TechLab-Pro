@@ -1,15 +1,27 @@
-import { Link } from 'expo-router';
+import { useEffect } from 'react';
+import { Link, useRouter } from 'expo-router';
 import { StyleSheet, Image, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { ThemedView } from '@/components/ThemedView';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function WelcomeScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const userToken = await AsyncStorage.getItem('userToken'); 
+      if (userToken) {
+        router.replace('/(tabs)'); 
+      }
+    };
+    checkLogin();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Ministry Banner */}
       <Image
-        source={require('@/assets/images/ministry_banner.png')} 
+        source={require('@/assets/images/ministry_banner.png')}
         style={styles.banner}
         resizeMode="contain"
       />

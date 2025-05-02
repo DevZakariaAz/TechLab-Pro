@@ -72,7 +72,7 @@ useEffect(() => {
           backgroundColor: colorScheme === "dark" ? colors.secondary : "#fff",
         },
       ]}
-      onPress={() => router.push(`/details/${item.id}`)}
+      onPress={() => router.push(`/techniquesDetail`)}
       activeOpacity={0.95}
     >
       <View style={styles.cardImageContainer}>
@@ -97,7 +97,7 @@ useEffect(() => {
           {item.description}
         </Text>
         <View style={styles.cardFooter}>
-          <TouchableOpacity style={styles.viewButton} onPress={() => router.push(`/details/${item.id}`)}>
+          <TouchableOpacity style={styles.viewButton} onPress={() => router.push(`/techniquesDetail`)}>
             <Text style={styles.viewButtonText}>Voir</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" style={styles.viewButtonIcon} />
           </TouchableOpacity>
