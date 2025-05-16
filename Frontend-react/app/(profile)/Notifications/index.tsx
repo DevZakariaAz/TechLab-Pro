@@ -46,7 +46,6 @@ const notifications = [
     icon: "pricetag-outline",
   },
 ]
-
 export default function NotificationsPage() {
   const router = useRouter()
 
@@ -74,7 +73,7 @@ export default function NotificationsPage() {
             <Text style={styles.markAllRead}>Tout marquer comme lu</Text>
           </TouchableOpacity>
         </View>
-
+        </ScrollView>
         <ScrollView style={styles.notificationList}>
           {notifications.map((notification) => (
             <TouchableOpacity
