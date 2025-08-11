@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Base;
 
+use App\Repositories\Base\BaseRepository;
 use App\Repository\RepositoryContract;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class BaseService implements ServiceContract
      *
      * @param RepositoryContract $repository The repository instance to handle data operations.
      */
-    public function __construct(RepositoryContract $repository)
+    public function __construct(BaseRepository $repository)
     {
         $this->repository = $repository;
     }
@@ -51,11 +52,10 @@ class BaseService implements ServiceContract
      * @param FormRequest $request The HTTP request containing input data.
      * @return bool True if creation is successful, false otherwise.
      */
-    public function create(FormRequest $request): bool
+    public function create(array $data)
     {
-        $data = $request->validated();
-        if($this->repository->create($data)) return true;
-        return false;
+        $item = $this->repository->create($data);
+        return $item;
     }
 
     /**
@@ -65,10 +65,9 @@ class BaseService implements ServiceContract
      * @param FormRequest $request The HTTP request containing updated data.
      * @return void
      */
-    public function update(int $id, FormRequest $request)
+    public function update(int $id, array $data)
     {
-        $data = $request->validated();
-        $this->repository->update($id, $data);
+        return $this->repository->update($id, $data);
     }
 
     /**

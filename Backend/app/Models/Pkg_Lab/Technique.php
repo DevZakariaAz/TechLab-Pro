@@ -7,13 +7,14 @@ use App\Models\User;
 
 class Technique extends Model
 {
+    protected $fillable = ['title', 'image', 'description','laboratory_id', 'category_id'];
     public function users()
     {
         return $this->belongsToMany(User::class, 'assignments')
             ->withTimestamps();
     }
 
-    public function favoredByTechnicians()
+    public function favoredByUsers()
     {
         return $this->belongsToMany(User::class, 'favorites')
             ->withTimestamps();
@@ -36,6 +37,6 @@ class Technique extends Model
 
     public function steps()
     {
-        return $this->belongsToMany(Technique::class, 'step_technique');
+        return $this->belongsToMany(Step::class, 'step_technique');
     }
 }
