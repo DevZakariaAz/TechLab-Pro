@@ -43,7 +43,7 @@ useEffect(() => {
     if (result.success) {
       setTechniques(result.techniques);
     } else {
-      console.error(result.message);
+      console.error(result); 
     }
     setLoading(false);
   };
