@@ -1,0 +1,95 @@
+### *Cahier des Charges : Application "TechLab-Pro" – Guide Chronométré des Techniques de Coloration*  
+
+#### *1. Introduction*  
+- *Nom* : TechLab-Pro  
+- *Objectif* :  
+  *Guider pas-à-pas les techniciens avec un chronomètre intégré pour chaque étape des protocoles de coloration* (H&E, Gram, Ziehl-Neelsen, etc.), en minimisant les erreurs et en standardisant les temps d’incubation.  
+
+---
+
+### *2. Fonctionnalités Clés*  
+#### *A. Chronomètre Intelligent par Étape*  
+- *Décompte automatique* :  
+  - L’application affiche le temps restant pour chaque étape (ex : "Éosine : 3 min – [Start]").  
+  - Alerte sonore/vibration pour signaler la fin d’une étape.  
+- *Pause/Reprise* : Permet d’interrompre le protocole (ex : en cas d’urgence).  
+
+#### *B. Fiches Protocoles Interactives*  
+- *Liste déroulante* :  
+  - Sélection de la technique (ex : "Coloration de Gram").  
+  - Affichage dynamique des étapes avec :  
+    - Durée  
+    - Réactifs nécessaires  
+    - Conseils (ex : "Éviter l’exposition à la lumière pour le Giemsa").  
+
+#### *C. Personnalisation*  
+- *Ajout de notes* : Commentaires personnels pour un protocole (ex : "Lot X du réactif → temps réduit de 10%").  
+- *Création de protocoles* : Pour des techniques personnalisées.  
+
+#### *D. Backup & Partage*  
+- Export des protocoles en PDF (avec chronologie).  
+- Synchronisation multi-appareils (tablette labo + smartphone).  
+
+---
+
+### *3. Spécifications Techniques*  
+- *Platformes* :  
+  - *Mobile prioritaire* (Android/iOS) pour usage en labo.  
+  - *Web* (version simplifiée pour consultation).  
+- *Technologies* :  
+  - *Frontend* : React Native (pour le mobile) + React.js (web).  
+  - *Backend* : Firebase (stockage des protocoles personnalisés).  
+- *Hors-ligne* : Fonctionne sans internet après téléchargement des protocoles.  
+
+---
+
+### *4. Design (UX/UI)*  
+- *Interface épurée* :  
+  - Écran principal : Liste des protocoles + barre de recherche.  
+  - Écran de chrono :  
+    - Gros bouton "Start/Pause"  
+    - Progression visuelle (barre de temps colorée).  
+- *Mode sombre* : Pour un usage prolongé sous microscope.  
+
+---
+
+### *5. Contraintes & Risques*  
+- *Précision du chrono* : Déviation max. de ±2 secondes (tests rigoureux nécessaires).  
+- *Compatibilité* : Doit supporter les gants (boutons larges, écran tactile réactif).  
+- *Sécurité* : Aucune donnée patient stockée → conforme RGPD.  
+
+---
+
+### *6. Livrables & Planning*  
+| *Phase*         | *Durée*   | *Sortie*                          |  
+|--------------------|-------------|-------------------------------------|  
+| Prototypage UI     | 2 semaines  | Maquettes interactives (Figma)      |  
+| Développement MVP  | 10 semaines | 3 protocoles de base + chrono       |  
+| Tests en labo      | 3 semaines  | Feedback des techniciens            |  
+| Améliorations      | 2 semaines  | Optimisation ergonomique            |  
+| Déploiement        | 1 semaine   | Publication sur stores              |  
+
+---
+
+### *7. Critères de Succès*  
+- *Utilisation quotidienne* par ≥ 70% des techniciens du labo partenaire.  
+- *Réduction des erreurs de timing* (mesurée via audits internes).  
+- *Note moyenne* ≥ 4.5/5 sur les stores.  
+
+---
+
+#### *Annexes*  
+- *Exemple de protocole intégré* :  
+    
+  [Hématoxyline]  
+  Durée : 5 min  
+  Réactif : Harris Hematoxylin  
+  Conseils : Filtrer avant utilisation.  
+    
+- *Références* :  
+  - "Bancroft’s Theory and Practice of Histological Techniques".  
+  - Procédures standards du labo demandeur.  
+
+💡 *Bonus envisageable* :  
+- *Syncro avec calendrier labo* (planification des colorations).  
+- *Module photo* : Prendre une image de l’échantillon + annotations.

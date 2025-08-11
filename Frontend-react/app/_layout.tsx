@@ -35,7 +35,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false, title: "User" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false, title: "Techniques" }} />
         <Stack.Screen name="(labs)" options={{ headerShown: false, title: "Laboratoires" }} />
-        <Stack.Screen name="(profile)" options={{ headerShown: false, title: "Profil" }} />
+        {/* <Stack.Screen name="(profile)" options={{ headerShown: false, title: "Profil" }} /> */}
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

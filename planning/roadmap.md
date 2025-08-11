@@ -1,7 +1,7 @@
-# 🚀 LaboChrono - Feuille de Route (1 Mois)
+# 🚀 TechLab-Pro - Planning
 
 ## 📌 Vue d’Ensemble  
-Cette feuille de route définit un **sprint de 1 mois** pour développer **LaboChrono**, une application mobile qui guide les techniciens de laboratoire dans les protocoles de coloration avec un chronomètre intégré.
+Cette feuille de route définit un **sprint de 1 mois** pour développer **TechLab-Pro**, une application mobile qui guide les techniciens de laboratoire dans les protocoles de coloration avec un chronomètre intégré.
 
 ---
 
