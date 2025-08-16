@@ -3405,20 +3405,22 @@
         },
         {
             "name": "sadiqsalau/laravel-otp",
-            "version": "v1.0.1",
+            "version": "v1.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sadiqsalau/laravel-otp.git",
-                "reference": "dda367f8022aead2af8823faef9247ee24b46d7d"
+                "reference": "c1e69dceeb65b4391b366138792a6c1c09c2053c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sadiqsalau/laravel-otp/zipball/dda367f8022aead2af8823faef9247ee24b46d7d",
-                "reference": "dda367f8022aead2af8823faef9247ee24b46d7d",
+                "url": "https://api.github.com/repos/sadiqsalau/laravel-otp/zipball/c1e69dceeb65b4391b366138792a6c1c09c2053c",
+                "reference": "c1e69dceeb65b4391b366138792a6c1c09c2053c",
                 "shasum": ""
             },
             "require": {
-                "hi-folks/rando-php": "^0.2.0"
+                "hi-folks/rando-php": "^0.2.0",
+                "laravel/framework": "^9|^10|^11|^12",
+                "php": "^8.0"
             },
             "type": "library",
             "extra": {
@@ -3446,9 +3448,9 @@
             "description": "OTP Package for Laravel",
             "support": {
                 "issues": "https://github.com/sadiqsalau/laravel-otp/issues",
-                "source": "https://github.com/sadiqsalau/laravel-otp/tree/v1.0.1"
+                "source": "https://github.com/sadiqsalau/laravel-otp/tree/v1.0.7"
             },
-            "time": "2023-09-09T09:19:42+00:00"
+            "time": "2025-06-06T15:57:47+00:00"
         },
         {
             "name": "spatie/laravel-permission",
