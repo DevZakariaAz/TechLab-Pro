@@ -1,8 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter,Stack } from "expo-router"
+import { useRouter, Stack } from "expo-router"
+
 import { getTechniques } from "../../../api/getTechniques"
+import { getCategories } from "@/api/getCategories"
+
 import {
   View,
   Text,
@@ -20,48 +23,82 @@ import {
 import { Ionicons, Feather } from "@expo/vector-icons"
 import { Colors } from "../../../constants/Colors"
 
-const CATEGORIES = [
-  { id: "all", name: "Toutes" },
-  { id: "histologiques", name: "Histologiques" },
-  { id: "fibres", name: "Fibres" },
-  { id: "microbiologiques", name: "Microbiologiques" },
-]
-
 const StainingTechniquesApp = () => {
   const colorScheme = useColorScheme() || "light"
   const colors = Colors[colorScheme]
   const router = useRouter()
 
   const [techniques, setTechniques] = useState([])
+  const [categories, setCategories] = useState([])
+  const [categoryMap, setCategoryMap] = useState({})
   const [activeCategory, setActiveCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [loading, setLoading] = useState(true)
 
-useEffect(() => {
-  const fetchTechniques = async () => {
-    const result = await getTechniques();
-    if (result.success) {
-      setTechniques(result.techniques);
-    } else {
-      console.error(result.message);
-    }
-    setLoading(false);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const [techniquesResult, categoriesResult] = await Promise.all([getTechniques(), getCategories()])
 
-  fetchTechniques();
-}, []);
+      if (techniquesResult.success) {
+        setTechniques(techniquesResult.techniques)
+      } else {
+        console.error(techniquesResult.message)
+      }
+
+      if (categoriesResult.success) {
+        setCategories(categoriesResult.categories)
+
+        const mapping = {}
+        categoriesResult.categories.forEach((cat) => {
+          if (cat.id !== "all") {
+            mapping[cat.id] = cat.name
+          }
+        })
+        setCategoryMap(mapping)
+      }
+
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [])
 
   const filteredTechniques = techniques.filter((technique) => {
-    const matchesCategory = activeCategory === "all" || technique.category.includes(activeCategory)
+    let matchesCategory = false
+
+    if (activeCategory === "all") {
+      matchesCategory = true
+    } else {
+      if (technique.category_id) {
+        // Convert both to strings for consistent comparison
+        matchesCategory = technique.category_id.toString() === activeCategory.toString()
+      } else if (technique.category) {
+        // Fallback for techniques with category names instead of IDs
+        const categoryName = technique.category.toLowerCase()
+        const activeCategoryName = categories
+          .find((cat) => cat.id.toString() === activeCategory.toString())
+          ?.name?.toLowerCase()
+        matchesCategory = categoryName === activeCategoryName
+      }
+    }
+
     const matchesSearch =
       technique.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      technique.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (technique.category && technique.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (technique.category_id && categoryMap[technique.category_id]?.toLowerCase().includes(searchQuery.toLowerCase()))
 
     return matchesCategory && (searchQuery === "" || matchesSearch)
   })
 
   const toggleFavorite = (id) => {
     console.log(`Toggle favorite for ${id}`)
+  }
+
+  const getCategoryDisplayName = (technique) => {
+    if (technique.category_id && categoryMap[technique.category_id]) {
+      return categoryMap[technique.category_id]
+    }
+    return technique.category || "Non classé"
   }
 
   const renderTechniqueItem = ({ item }) => (
@@ -85,7 +122,7 @@ useEffect(() => {
           />
         </TouchableOpacity>
         <View style={styles.categoryBadge}>
-          <Text style={styles.categoryBadgeText}>{item.category}</Text>
+          <Text style={styles.categoryBadgeText}>{getCategoryDisplayName(item)}</Text>
         </View>
       </View>
 
@@ -121,7 +158,9 @@ useEffect(() => {
                   name="options-outline"
                   size={24}
                   color={colors.text}
-                  onclick={() => {router.push('/Settings')}}
+                  onPress={() => {
+                    router.push("/Settings")
+                  }}
                 />
               </TouchableOpacity>
             </>
@@ -158,7 +197,7 @@ useEffect(() => {
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryContainer}>
-          {CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <TouchableOpacity
               key={category.id}
               style={[
