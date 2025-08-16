@@ -16,7 +16,7 @@ class TechniqueSeeder extends Seeder
         $technique = Technique::create([
             'id' => 1,
             'title' => 'Analyse Chimique de l\'eau',
-            'image' => 'analyse_chimique.jpg',
+            'image' => 'https://images.pexels.com/photos/9629678/pexels-photo-9629678.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'description' => 'Analyse de la composition chimique de l\'eau en laboratoire.',
             'laboratory_id' => 1,
             'category_id' => 2,
@@ -25,7 +25,7 @@ class TechniqueSeeder extends Seeder
         Technique::create([
             'id' => 2,
             'title' => 'Culture de Bactéries',
-            'image' => 'culture_bacteries.jpg',
+            'image' => 'https://images.pexels.com/photos/4031440/pexels-photo-4031440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'description' => 'Étude de la culture de bactéries en milieu contrôlé.',
             'laboratory_id' => 1,
             'category_id' => 3,
@@ -34,7 +34,7 @@ class TechniqueSeeder extends Seeder
         Technique::create([
             'id' => 3,
             'title' => 'Test de Résistance des Matériaux',
-            'image' => 'test_resistance.jpg',
+            'image' => 'http://images.pexels.com/photos/9629715/pexels-photo-9629715.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'description' => 'Test de résistance des matériaux sous différentes conditions.',
             'laboratory_id' => 1,
             'category_id' => 5,
@@ -43,7 +43,7 @@ class TechniqueSeeder extends Seeder
         Technique::create([
             'id' => 4,
             'title' => 'Analyse du Sol',
-            'image' => 'analyse_sol.jpg',
+            'image' => 'https://images.pexels.com/photos/4031370/pexels-photo-4031370.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'description' => 'Étude de la composition du sol et de ses propriétés physiques.',
             'laboratory_id' => 1,
             'category_id' => 1,
@@ -52,7 +52,7 @@ class TechniqueSeeder extends Seeder
         Technique::create([
             'id' => 5,
             'title' => 'Observation Microscopique',
-            'image' => 'observation_microscope.jpg',
+            'image' => 'https://images.pexels.com/photos/8539945/pexels-photo-8539945.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2',
             'description' => 'Observation de microorganismes au microscope.',
             'laboratory_id' => 1,
             'category_id' => 4,
