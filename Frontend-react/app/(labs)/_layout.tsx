@@ -1,44 +1,43 @@
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
-import React from "react";
-import { Stack } from "expo-router";
-import { Ionicons, Feather } from "@expo/vector-icons";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native"
+import { Stack } from "expo-router"
+import { Ionicons, Feather } from "@expo/vector-icons"
+import { GestureHandlerRootView } from "react-native-gesture-handler"
 
 // Styles for the bottom navigation
 const styles = {
   bottomNav: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
     paddingVertical: 10,
     height: 60,
-    zIndex: 1,  // Ensures it stays above other content
+    zIndex: 1,
   },
   navItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   navItemActive: {
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomWidth: 2,
-    borderBottomColor: '#4caf50', // Active item color (e.g., light green)
+    borderBottomColor: "#4caf50", 
   },
   navLabel: {
     fontSize: 12,
     marginTop: 4,
   },
-};
+}
 
 const _layout = () => {
-  const colorScheme = useColorScheme(); // Get current color scheme (light/dark)
+  const colorScheme = useColorScheme() // Get current color scheme (light/dark)
   const colors = {
-    background: colorScheme === 'dark' ? '#121212' : '#ffffff',
-    icon: colorScheme === 'dark' ? '#fff' : '#000',
-    lightGreen: '#4caf50',
-  };
+    background: colorScheme === "dark" ? "#121212" : "#ffffff",
+    icon: colorScheme === "dark" ? "#fff" : "#000",
+    lightGreen: "#4caf50",
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -50,20 +49,38 @@ const _layout = () => {
             options={{
               title: "Techniques de Coloration",
               headerTitleAlign: "center",
+              headerBackVisible: false,
+              headerRight: () => <Ionicons name="ellipsis-vertical" size={24} color="black" />,
+            }}
+          />
+          <Stack.Screen
+            name="techniquesDetail"
+            options={{
+              title: "Détails de Technique",
+              headerTitleAlign: "center",
               headerBackVisible: true,
-              headerRight: () => (
-                <Ionicons name="ellipsis-vertical" size={24} color="black" />
-              ),
+              headerBackTitle: "",
+              headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
+            }}
+          />
+          <Stack.Screen
+            name="stepsList"
+            options={{
+              title: "Liste des Étapes",
+              headerTitleAlign: "center",
+              headerBackVisible: true,
+              headerBackTitle: "",
+              headerTintColor: colorScheme === "dark" ? "#fff" : "#000",
             }}
           />
         </Stack>
         {/* Bottom Navigation */}
-        <View
+        {/* <View
           style={[
             styles.bottomNav,
             {
-              backgroundColor: colorScheme === 'dark' ? colors.background : '#fff',
-              borderTopColor: colorScheme === 'dark' ? 'rgba(255,255,255,0.1)' : '#f0f0f0',
+              backgroundColor: colorScheme === "dark" ? colors.background : "#fff",
+              borderTopColor: colorScheme === "dark" ? "rgba(255,255,255,0.1)" : "#f0f0f0",
             },
           ]}
         >
@@ -81,10 +98,10 @@ const _layout = () => {
             <Feather name="user" size={24} color={colors.icon} />
             <Text style={[styles.navLabel, { color: colors.icon }]}>Profil</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
     </GestureHandlerRootView>
-  );
-};
+  )
+}
 
-export default _layout;
+export default _layout
