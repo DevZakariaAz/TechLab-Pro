@@ -1,6 +1,13 @@
-// api/getCategories.ts
+export interface Category {
+  id: string | number
+  name: string
+  description?: string
+  created_at?: string
+  updated_at?: string
+}
+
 export const getCategories = async () => {
-  const fallbackCategories = [
+  const fallbackCategories: Category[] = [
     { id: "all", name: "Toutes", description: "Afficher toutes les techniques" },
     { id: "1", name: "Microbiologie", description: "Étude des micro-organismes" },
     { id: "2", name: "Histologiques", description: "Coupes histologiques générales" },
@@ -19,7 +26,7 @@ export const getCategories = async () => {
     const data = await response.json()
 
     if (response.ok && Array.isArray(data)) {
-      // On ajoute manuellement l’option "Toutes" en premier
+      // On ajoute manuellement l'option "Toutes" en premier
       return {
         success: true,
         categories: [{ id: "all", name: "Toutes" }, ...data],
