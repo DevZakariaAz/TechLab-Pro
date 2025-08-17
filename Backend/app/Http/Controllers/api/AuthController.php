@@ -86,7 +86,6 @@ class AuthController extends Controller
 
 
     public function register(Request $request)
-{
     {
         try {
             $validateUser = Validator::make($request->all(), [
@@ -95,54 +94,46 @@ class AuthController extends Controller
                 'password' => 'required|string|min:6',
                 'laboratory_id' => 'required|exists:laboratories,id',
             ]);
+
             if ($validateUser->fails()) {
-                return response()->json(
-                    [
-                        'status' =>false,
-                        'message' => 'La validation a échoué',
-                        'errors' => $validateUser->errors(),
-                    ], 422);
+                return response()->json([
+                    'status' => false,
+                    'message' => 'La validation a échoué',
+                    'errors' => $validateUser->errors(),
+                ], 422);
             }
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
+
             $token = $user->createToken('auth_token')->plainTextToken;
-            return response()->json(
-                [
-                    'status' =>true,
-                    'message' => 'utilisateur créé avec succès',
+
+            // Send OTP
+            $otp = Otp::identifier($request->email)->send(
+                new UserRegistrationOtp(
+                    name: $request->name,
+                    email: $request->email,
+                    password: $request->password
+                ),
+                Notification::route('mail', $request->email)
+            );
+
+            if ($otp['status'] === Otp::OTP_SENT) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'OTP envoyé avec succès. Veuillez vérifier votre boîte de réception.',
                     'token' => $token,
                     'user' => $user,
-                ]
-            ,200);
-        }
+                ], 200);
+            }
 
-        // Log::info('Sending OTP to: ' . $request->email); // Log recipient email
-
-        $otp = Otp::identifier($request->email)->send(
-            new UserRegistrationOtp(
-                name: $request->name,
-                email: $request->email,
-                password: $request->password
-            ),
-            Notification::route('mail', $request->email)
-        );
-
-        // Log::info('OTP Response: ' . json_encode($otp, JSON_PARTIAL_OUTPUT_ON_ERROR)); // Fixed logging
-
-        if ($otp['status'] === Otp::OTP_SENT) {
             return response()->json([
-                'status' => true,
-                'message' => 'OTP envoyé avec succès. Veuillez vérifier votre boîte de réception.',
-            ], 200);
-        }
-
-        return response()->json([
-            'status' => false,
-            'message' => 'Échec de l\'envoi de l\'OTP : ' . __($otp['status']),
-        ], 422);
+                'status' => false,
+                'message' => 'Échec de l\'envoi de l\'OTP : ' . __($otp['status']),
+            ], 422);
 
         } catch (\Exception $error) {
             Log::error('OTP Error: ' . $error->getMessage());
@@ -151,7 +142,8 @@ class AuthController extends Controller
                 'message' => 'Une erreur s\'est produite : ' . $error->getMessage(),
             ], 500);
         }
-}
+    }
+
 
 
 

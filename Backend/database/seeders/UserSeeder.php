@@ -17,10 +17,10 @@ class UserSeeder extends Seeder
         $technicianRole = Role::where('name', 'technician')->first();
         $technician = User::create([
             'id' => 2,
-            'name' => 'Aymen CHABBEH',
-            'email' => 'Aymen@chabbeh.com',
+            'name' => 'Zakaria Azizi',
+            'email' => 'zakaria@gmail.com',
             'laboratory_id' => 1,
-            'password' => bcrypt('123456'),
+            'password' => bcrypt('123456789'),
         ]);
         $technician->assignRole($technicianRole);
 
