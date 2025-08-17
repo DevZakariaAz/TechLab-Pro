@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, Stack } from "expo-router"
 
-import { getTechniques } from "../../../api/getTechniques"
+import { getTechniques } from "@/api/getTechniques"
 import { getCategories } from "@/api/getCategories"
 
 import {
@@ -21,7 +21,7 @@ import {
   ActivityIndicator,
 } from "react-native"
 import { Ionicons, Feather } from "@expo/vector-icons"
-import { Colors } from "../../../constants/Colors"
+import { Colors } from "@/constants/Colors"
 
 const StainingTechniquesApp = () => {
   const colorScheme = useColorScheme() || "light"
@@ -109,7 +109,7 @@ const StainingTechniquesApp = () => {
           backgroundColor: colorScheme === "dark" ? colors.secondary : "#fff",
         },
       ]}
-      onPress={() => router.push(`/details/${item.id}`)}
+      onPress={() => router.push(`/techniquesDetail/${item.id}`)}
       activeOpacity={0.95}
     >
       <View style={styles.cardImageContainer}>
@@ -134,7 +134,7 @@ const StainingTechniquesApp = () => {
           {item.description}
         </Text>
         <View style={styles.cardFooter}>
-          <TouchableOpacity style={styles.viewButton} onPress={() => router.push(`/details/${item.id}`)}>
+          <TouchableOpacity style={styles.viewButton} onPress={() => router.push(`/techniquesDetail/${item.id}`)}>
             <Text style={styles.viewButtonText}>Voir</Text>
             <Ionicons name="arrow-forward" size={16} color="#fff" style={styles.viewButtonIcon} />
           </TouchableOpacity>
