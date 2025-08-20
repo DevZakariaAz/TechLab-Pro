@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } fr
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { getTechniqueSteps, type StepTip } from "@/api/getTechniqueDetail"
+import { Stack } from "expo-router"
 
 interface Step {
   id: number
@@ -67,13 +68,26 @@ export default function StepsExecution() {
   const getStepStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "#10B981"
+        return "#059669" // Emerald-600
       case "in-progress":
-        return "#06B6D4"
+        return "#0284C7" // Sky-600
       case "todo":
-        return "#E5E7EB"
+        return "#64748B" // Slate-500
       default:
-        return "#E5E7EB"
+        return "#64748B"
+    }
+  }
+
+  const getStepStatusBgColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "#D1FAE5" // Emerald-100
+      case "in-progress":
+        return "#E0F2FE" // Sky-100
+      case "todo":
+        return "#F1F5F9" // Slate-100
+      default:
+        return "#F1F5F9"
     }
   }
 
@@ -134,71 +148,121 @@ export default function StepsExecution() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Instructions Détaillées</Text>
-      </View>
-
-      <ScrollView style={styles.content}>
+      <Stack.Screen
+      options={{
+          title: "Liste des Étapes",
+          headerTitleAlign: "center",
+          headerBackVisible: true,
+        // headerBackTitleVisible: false,
+          headerBackTitle: "",
+          headerStyle: { backgroundColor: "#fff" },
+          headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: "600",
+            color: "#000",
+        },
+      }}
+      />
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Technique Title */}
-        <Text style={styles.techniqueTitle}>{techniqueName || "Technique de Laboratoire"}</Text>
-        <Text style={styles.techniqueSubtitle}>Colorations Histologiques de Base</Text>
+        <View style={styles.titleSection}>
+          <Text style={styles.techniqueTitle}>{techniqueName || "Technique de Laboratoire"}</Text>
+          <Text style={styles.techniqueSubtitle}>Colorations Histologiques de Base</Text>
+        </View>
 
-        {/* Steps List Title */}
-        <View style={styles.stepsHeader}>
-          <Ionicons name="list" size={20} color="#666" />
-          <Text style={styles.stepsTitle}>Liste des Étapes :</Text>
+        {/* Steps Progress Overview */}
+        <View style={styles.progressOverview}>
+          <View style={styles.progressHeader}>
+            <Ionicons name="list" size={22} color="#0284C7" />
+            <Text style={styles.stepsTitle}>Liste des Étapes</Text>
+            <View style={styles.progressBadge}>
+              <Text style={styles.progressText}>
+                {currentStepIndex + 1}/{steps.length}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* Steps List */}
         {steps.map((step, index) => (
           <TouchableOpacity
             key={step.id}
-            style={[styles.stepCard, { borderColor: getStepStatusColor(step.status) }]}
+            style={[
+              styles.stepCard,
+              {
+                borderColor: getStepStatusColor(step.status),
+                backgroundColor: step.status === "in-progress" ? "#FEFEFF" : "#FFFFFF",
+                transform: [{ scale: step.status === "in-progress" ? 1.02 : 1 }],
+              },
+            ]}
             onPress={() => handleStepPress(index)}
+            activeOpacity={0.7}
           >
+            {/* Step Header */}
             <View style={styles.stepHeader}>
-              <Text style={[styles.stepNumber, { color: getStepStatusColor(step.status) }]}>Étape {step.id}</Text>
-              <Text style={styles.stepName}>: {step.title}</Text>
-
-              {step.status === "in-progress" && (
-                <View style={styles.timerContainer}>
-                  <Text style={styles.timerText}>{formatTime(timer)}</Text>
+              <View style={styles.stepTitleRow}>
+                <View style={[styles.stepBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
+                  <Text style={[styles.stepNumber, { color: getStepStatusColor(step.status) }]}>{step.id}</Text>
                 </View>
-              )}
+                <Text style={styles.stepName}>{step.title}</Text>
+              </View>
 
-              {step.status !== "in-progress" && (
-                <Text style={[styles.statusText, { color: getStepStatusColor(step.status) }]}>
-                  {getStepStatusText(step.status)}
-                </Text>
-              )}
+              {/* Status and Timer */}
+              <View style={styles.statusRow}>
+                {step.status === "in-progress" && (
+                  <View style={styles.timerContainer}>
+                    <Ionicons name="time" size={16} color="#0284C7" />
+                    <Text style={styles.timerText}>{formatTime(timer)}</Text>
+                  </View>
+                )}
+
+                <View style={[styles.statusBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
+                  <Text style={[styles.statusText, { color: getStepStatusColor(step.status) }]}>
+                    {getStepStatusText(step.status)}
+                  </Text>
+                </View>
+              </View>
             </View>
 
+            {/* Step Details */}
             <View style={styles.stepDetails}>
-              <View style={styles.stepDetail}>
-                <Text style={styles.detailLabel}>→ Réactif</Text>
-                <Text style={styles.detailValue}>: {step.reactive}</Text>
+              <View style={styles.detailRow}>
+                <View style={styles.detailItem}>
+                  <Ionicons name="flask" size={16} color="#64748B" />
+                  <Text style={styles.detailLabel}>Réactif</Text>
+                  <Text style={styles.detailValue}>{step.reactive}</Text>
+                </View>
               </View>
-              <View style={styles.stepDetail}>
-                <Text style={styles.detailLabel}>→ Temps</Text>
-                <Text style={styles.detailValue}>: Durée estimée {step.duration} min</Text>
+
+              <View style={styles.detailRow}>
+                <View style={styles.detailItem}>
+                  <Ionicons name="timer" size={16} color="#64748B" />
+                  <Text style={styles.detailLabel}>Durée</Text>
+                  <Text style={styles.detailValue}>{step.duration} min</Text>
+                </View>
               </View>
+
               {step.description && (
-                <View style={styles.stepDetail}>
-                  <Text style={styles.detailLabel}>→ Conseil</Text>
-                  <Text style={styles.detailValue}>: {step.description}</Text>
+                <View style={styles.detailRow}>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="information-circle" size={16} color="#64748B" />
+                    <Text style={styles.detailLabel}>Conseil</Text>
+                    <Text style={styles.detailValue}>{step.description}</Text>
+                  </View>
                 </View>
               )}
 
+              {/* Tips Section */}
               {step.tips && step.tips.length > 0 && (
                 <View style={styles.tipsContainer}>
-                  <Text style={styles.tipsTitle}>💡 Conseils :</Text>
+                  <View style={styles.tipsHeader}>
+                    <Ionicons name="bulb" size={16} color="#0284C7" />
+                    <Text style={styles.tipsTitle}>Conseils pratiques</Text>
+                  </View>
                   {step.tips.map((tip) => (
                     <View key={tip.id} style={styles.tipItem}>
                       <Text style={styles.tipText}>• {tip.tip}</Text>
-                      {tip.description && <Text style={styles.tipDescription}> {tip.description}</Text>}
+                      {tip.description && <Text style={styles.tipDescription}>{tip.description}</Text>}
                     </View>
                   ))}
                 </View>
@@ -208,13 +272,13 @@ export default function StepsExecution() {
             {/* Timer Controls for Current Step */}
             {step.status === "in-progress" && (
               <View style={styles.timerControls}>
-                <TouchableOpacity style={[styles.controlButton, styles.pauseButton]} onPress={toggleTimer}>
+                <TouchableOpacity
+                  style={[styles.controlButton, isRunning ? styles.pauseButton : styles.playButton]}
+                  onPress={toggleTimer}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name={isRunning ? "pause" : "play"} size={18} color="#FFFFFF" />
                   <Text style={styles.controlButtonText}>{isRunning ? "Pause" : "Reprendre"}</Text>
-                  <Ionicons name={isRunning ? "pause" : "play"} size={16} color="#EF4444" />
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.controlButton, styles.resumeButton]}>
-                  <Text style={[styles.controlButtonText, { color: "#10B981" }]}>Reprise</Text>
-                  <Ionicons name="refresh" size={16} color="#10B981" />
                 </TouchableOpacity>
               </View>
             )}
@@ -226,7 +290,7 @@ export default function StepsExecution() {
                   style={[
                     styles.progressBar,
                     {
-                      width: `${((step.duration * 60 - timer) / (step.duration * 60)) * 100}%`,
+                      width: `${Math.max(0, ((step.duration * 60 - timer) / (step.duration * 60)) * 100)}%`,
                       backgroundColor: getStepStatusColor(step.status),
                     },
                   ]}
@@ -235,18 +299,20 @@ export default function StepsExecution() {
             )}
           </TouchableOpacity>
         ))}
+
+        <View style={styles.bottomSpacing} />
       </ScrollView>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton}>
-          <Ionicons name="home" size={24} color="#06B6D4" />
+        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
+          <Ionicons name="home" size={24} color="#0284C7" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Ionicons name="mail-outline" size={24} color="#9CA3AF" />
+        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
+          <Ionicons name="mail-outline" size={24} color="#64748B" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton}>
-          <Ionicons name="person-outline" size={24} color="#9CA3AF" />
+        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
+          <Ionicons name="person-outline" size={24} color="#64748B" />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -256,200 +322,275 @@ export default function StepsExecution() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#F8FAFC", // Slate-50
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: "#E2E8F0", // Slate-200
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   backButton: {
-    marginRight: 12,
+    marginRight: 16,
+    padding: 4,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1E293B", // Slate-800
+    letterSpacing: -0.5,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
+  },
+  titleSection: {
+    paddingVertical: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    marginBottom: 20,
   },
   techniqueTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#111827",
-    marginTop: 20,
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#0F172A", // Slate-900
     marginBottom: 8,
+    letterSpacing: -0.5,
+    lineHeight: 34,
   },
   techniqueSubtitle: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: "#64748B", // Slate-500
+    fontWeight: "500",
+  },
+  progressOverview: {
     marginBottom: 24,
   },
-  stepsHeader: {
+  progressHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    justifyContent: "space-between",
   },
   stepsTitle: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1E293B",
+    flex: 1,
+    marginLeft: 12,
+  },
+  progressBadge: {
+    backgroundColor: "#E0F2FE", // Sky-100
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  progressText: {
+    fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
-    marginLeft: 8,
+    color: "#0284C7", // Sky-600
   },
   stepCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 2,
-    marginBottom: 12,
-    padding: 16,
+    marginBottom: 16,
+    padding: 20,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   stepHeader: {
+    marginBottom: 16,
+  },
+  stepTitleRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-    flexWrap: "wrap",
+  },
+  stepBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
   stepNumber: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
   stepName: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: "#1E293B",
     flex: 1,
+    lineHeight: 24,
+  },
+  statusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   timerContainer: {
-    backgroundColor: "#FEF3C7",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginLeft: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FEF3C7", // Amber-100
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    gap: 6,
   },
   timerText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#92400E",
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#92400E", // Amber-800
+    fontFamily: "monospace",
+  },
+  statusBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   statusText: {
     fontSize: 14,
-    fontWeight: "500",
-    marginLeft: 8,
+    fontWeight: "600",
   },
   stepDetails: {
-    marginBottom: 12,
+    gap: 12,
   },
-  stepDetail: {
+  detailRow: {
+    marginBottom: 8,
+  },
+  detailItem: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    gap: 8,
   },
   detailLabel: {
     fontSize: 14,
-    color: "#06B6D4",
-    fontWeight: "500",
-    minWidth: 80,
+    fontWeight: "600",
+    color: "#475569", // Slate-600
+    minWidth: 60,
   },
   detailValue: {
     fontSize: 14,
-    color: "#6B7280",
+    color: "#64748B",
     flex: 1,
+    lineHeight: 20,
+  },
+  tipsContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "#F0F9FF", // Sky-50
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: "#0284C7",
+  },
+  tipsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 8,
+  },
+  tipsTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#0284C7",
+  },
+  tipItem: {
+    marginBottom: 8,
+  },
+  tipText: {
+    fontSize: 14,
+    color: "#0369A1", // Sky-700
+    fontWeight: "500",
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  tipDescription: {
+    fontSize: 13,
+    color: "#0284C7",
+    fontStyle: "italic",
+    lineHeight: 18,
+    paddingLeft: 12,
   },
   timerControls: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 8,
-    marginBottom: 12,
+    alignItems: "center",
+    marginTop: 16,
   },
   controlButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+    minWidth: 140,
+    justifyContent: "center",
   },
   pauseButton: {
-    backgroundColor: "#FEE2E2",
+    backgroundColor: "#EF4444", // Red-500
   },
-  resumeButton: {
-    backgroundColor: "#D1FAE5",
+  playButton: {
+    backgroundColor: "#059669", // Emerald-600
   },
   controlButtonText: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: "#EF4444",
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   progressBarContainer: {
-    height: 4,
-    backgroundColor: "#E5E7EB",
-    borderRadius: 2,
+    height: 6,
+    backgroundColor: "#E2E8F0", // Slate-200
+    borderRadius: 3,
     overflow: "hidden",
+    marginTop: 16,
   },
   progressBar: {
     height: "100%",
-    borderRadius: 2,
+    borderRadius: 3,
   },
   bottomNav: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
+    borderTopColor: "#E2E8F0",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   navButton: {
-    padding: 8,
+    padding: 12,
+    borderRadius: 12,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 16,
   },
   loadingText: {
-    fontSize: 16,
-    color: "#6B7280",
-  },
-  tipsContainer: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: "#F0F9FF",
-    borderRadius: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: "#0EA5E9",
-  },
-  tipsTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#0369A1",
-    marginBottom: 8,
-  },
-  tipItem: {
-    marginBottom: 4,
-  },
-  tipText: {
-    fontSize: 13,
-    color: "#0369A1",
+    fontSize: 18,
+    color: "#64748B",
     fontWeight: "500",
   },
-  tipDescription: {
-    fontSize: 12,
-    color: "#0284C7",
-    fontStyle: "italic",
+  bottomSpacing: {
+    height: 20,
   },
 })
