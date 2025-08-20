@@ -1,3 +1,5 @@
+"use client"
+
 import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native"
 import { Stack } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
@@ -5,6 +7,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useState, useEffect } from "react"
 import { getTechniqueDetail, getTechniqueSteps, type TechniqueDetail, type Step } from "@/api/getTechniqueDetail"
 import { getCategories, type Category } from "@/api/getCategories"
+import { router } from "expo-router"
 
 // const StarRating = ({
 //   rating,
@@ -118,7 +121,7 @@ const TechniqueHeader = ({
   categoryName: string
 }) => (
   <View style={styles.techniqueInfo}>
-    <Text style={styles.title}>{technique?.name || technique?.title || "Chargement du titre..."}</Text>
+    <Text style={styles.title}>{technique?.title || "Chargement du titre..."}</Text>
     <Text style={styles.category}>{categoryName}</Text>
     {/* <StarRating rating={technique?.rating || 0} /> */}
   </View>
@@ -206,7 +209,6 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
   }, [techniqueId])
 
   const getCategoryName = (): string => {
-
     if (technique?.category?.name) {
       return technique.category.name
     }
@@ -239,7 +241,13 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
 
   const handleStart = () => {
     console.log("Start technique:", technique?.id)
-    // TODO: Navigate to steps execution screen
+    router.push({
+      pathname: "/stepsList",
+      params: {
+        techniqueId: technique?.id?.toString() || techniqueId,
+        techniqueName: technique?.title,
+      },
+    })
   }
 
   const handleStepPress = (stepId: number) => {
