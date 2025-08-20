@@ -63,7 +63,7 @@ const LoadingState = () => (
         headerTitleAlign: "center",
         headerBackVisible: true,
         headerBackTitle: "",
-        headerBackTitleVisible: false,
+        // headerBackTitleVisible: false,
         headerStyle: { backgroundColor: "#fff" },
         headerTitleStyle: {
           fontSize: 18,
@@ -89,7 +89,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
         headerTitleAlign: "center",
         headerBackVisible: true,
         headerBackTitle: "",
-        headerBackTitleVisible: false,
+        // headerBackTitleVisible: false,
         headerStyle: { backgroundColor: "#fff" },
         headerTitleStyle: {
           fontSize: 18,
@@ -268,7 +268,7 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
           headerTitleAlign: "center",
           headerBackVisible: true,
           headerBackTitle: "",
-          headerBackTitleVisible: false,
+          // headerBackTitleVisible: false,
           headerStyle: { backgroundColor: "#fff" },
           headerTitleStyle: {
             fontSize: 18,
