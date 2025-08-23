@@ -1,13 +1,13 @@
 "use client"
-
-import { StyleSheet } from "react-native";
 import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { getTechniqueSteps, getStepTips, type StepTip } from "@/api/getTechniqueDetail"
-console.log("StyleSheet:", StyleSheet);
-
+import { Colors } from "@/constants/Colors"
+import StepCompletionModal from "@/app/(labs)/step-completion-modal"
+import { StyleSheet } from "react-native"
+import { Stack } from "expo-router"
 interface Step {
   id: number
   title: string
@@ -32,17 +32,70 @@ export default function StepsExecution() {
   const [timer, setTimer] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
   const [currentTipIndex, setCurrentTipIndex] = useState(0)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [completedStep, setCompletedStep] = useState<{ number: number; title: string } | null>(null)
+
+  const playCompletionSound = () => {
+    if (typeof window !== "undefined" && window.AudioContext) {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime)
+      oscillator.frequency.setValueAtTime(1000, audioContext.currentTime + 0.1)
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime + 0.2)
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.3)
+    }
+  }
+
+  const completeCurrentStep = () => {
+    const currentStep = steps[currentStepIndex]
+    if (currentStep && currentStep.status === "in-progress") {
+      const newSteps = [...steps]
+      newSteps[currentStepIndex].status = "completed"
+      setSteps(newSteps)
+
+      setCompletedStep({
+        number: currentStep.id,
+        title: currentStep.title,
+      })
+
+      playCompletionSound()
+
+      setShowCompletionModal(true)
+
+      setIsRunning(false)
+    }
+  }
+
+  const handleModalContinue = () => {
+    setShowCompletionModal(false)
+    setCompletedStep(null)
+
+    if (currentStepIndex < steps.length - 1) {
+      const nextIndex = currentStepIndex + 1
+      handleStepPress(nextIndex)
+    }
+  }
 
   const fetchStepTips = async (stepId: number, stepIndex: number) => {
     try {
       setLoadingTips(true)
       const tips = await getStepTips(stepId)
-      
-      setSteps(prevSteps => {
+
+      setSteps((prevSteps) => {
         const newSteps = [...prevSteps]
         newSteps[stepIndex] = {
           ...newSteps[stepIndex],
-          tips: tips
+          tips: tips,
         }
         return newSteps
       })
@@ -57,18 +110,23 @@ export default function StepsExecution() {
     let interval: NodeJS.Timeout
     if (isRunning && timer > 0) {
       interval = setInterval(() => {
-        setTimer((timer) => timer - 1)
-        
+        setTimer((timer) => {
+          if (timer <= 1) {
+            completeCurrentStep()
+            return 0
+          }
+          return timer - 1
+        })
+
         const currentStep = steps[currentStepIndex]
         if (currentStep && currentStep.tips && currentStep.tips.length > 1) {
           const stepDurationInSeconds = currentStep.duration * 60
           const timeElapsed = stepDurationInSeconds - timer
           const tipDuration = Math.floor(stepDurationInSeconds / currentStep.tips.length)
           const newTipIndex = Math.floor(timeElapsed / tipDuration)
-          
-          // Ensure we don't exceed the number of tips
+
           const clampedTipIndex = Math.min(newTipIndex, currentStep.tips.length - 1)
-          
+
           if (clampedTipIndex !== currentTipIndex) {
             setCurrentTipIndex(clampedTipIndex)
           }
@@ -98,7 +156,7 @@ export default function StepsExecution() {
     setSteps(newSteps)
     setTimer(newSteps[index].duration * 60)
     setIsRunning(true)
-    
+
     await fetchStepTips(newSteps[index].id, index)
   }
 
@@ -109,26 +167,26 @@ export default function StepsExecution() {
   const getStepStatusColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "#059669" // Emerald-600
+        return Colors.lightGreen
       case "in-progress":
-        return "#0284C7" // Sky-600
+        return Colors.light.primary
       case "todo":
-        return "#64748B" // Slate-500
+        return Colors.light.icon
       default:
-        return "#64748B"
+        return Colors.light.icon
     }
   }
 
   const getStepStatusBgColor = (status: string) => {
     switch (status) {
       case "completed":
-        return "#D1FAE5" // Emerald-100
+        return "#D1FAE5"
       case "in-progress":
-        return "#E0F2FE" // Sky-100
+        return Colors.light.secondary
       case "todo":
-        return "#F1F5F9" // Slate-100
+        return Colors.light.secondary
       default:
-        return "#F1F5F9"
+        return Colors.light.secondary
     }
   }
 
@@ -190,25 +248,31 @@ export default function StepsExecution() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="#475569" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Instructions Détaillées</Text>
-      </View>
+          <Stack.Screen
+      options={{
+        title: "Instructions de la Technique",
+        headerTitleAlign: "center",
+        headerBackVisible: true,
+        headerBackTitle: "",
+        // headerBackTitleVisible: false,
+        headerStyle: { backgroundColor: "#fff" },
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: "600",
+          color: "#000",
+        },
+      }}
+    />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Technique Title */}
         <View style={styles.titleSection}>
           <Text style={styles.techniqueTitle}>{techniqueName || "Technique de Laboratoire"}</Text>
           <Text style={styles.techniqueSubtitle}>Colorations Histologiques de Base</Text>
         </View>
 
-        {/* Steps Progress Overview */}
         <View style={styles.progressOverview}>
           <View style={styles.progressHeader}>
-            <Ionicons name="list" size={22} color="#0284C7" />
+            <Ionicons name="list" size={22} color={Colors.light.primary} />
             <Text style={styles.stepsTitle}>Liste des Étapes</Text>
             <View style={styles.progressBadge}>
               <Text style={styles.progressText}>
@@ -218,7 +282,6 @@ export default function StepsExecution() {
           </View>
         </View>
 
-        {/* Steps List */}
         {steps.map((step, index) => (
           <TouchableOpacity
             key={step.id}
@@ -233,7 +296,6 @@ export default function StepsExecution() {
             onPress={() => handleStepPress(index)}
             activeOpacity={0.7}
           >
-            {/* Step Header */}
             <View style={styles.stepHeader}>
               <View style={styles.stepTitleRow}>
                 <View style={[styles.stepBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
@@ -242,11 +304,10 @@ export default function StepsExecution() {
                 <Text style={styles.stepName}>{step.title}</Text>
               </View>
 
-              {/* Status and Timer */}
               <View style={styles.statusRow}>
                 {step.status === "in-progress" && (
                   <View style={styles.timerContainer}>
-                    <Ionicons name="time" size={16} color="#0284C7" />
+                    <Ionicons name="time" size={16} color={Colors.light.primary} />
                     <Text style={styles.timerText}>{formatTime(timer)}</Text>
                   </View>
                 )}
@@ -259,11 +320,10 @@ export default function StepsExecution() {
               </View>
             </View>
 
-            {/* Step Details */}
             <View style={styles.stepDetails}>
               <View style={styles.detailRow}>
                 <View style={styles.detailItem}>
-                  <Ionicons name="flask" size={16} color="#64748B" />
+                  <Ionicons name="flask" size={16} color={Colors.light.icon} />
                   <Text style={styles.detailLabel}>Réactif</Text>
                   <Text style={styles.detailValue}>{step.reactive}</Text>
                 </View>
@@ -271,7 +331,7 @@ export default function StepsExecution() {
 
               <View style={styles.detailRow}>
                 <View style={styles.detailItem}>
-                  <Ionicons name="timer" size={16} color="#64748B" />
+                  <Ionicons name="timer" size={16} color={Colors.light.icon} />
                   <Text style={styles.detailLabel}>Durée</Text>
                   <Text style={styles.detailValue}>{step.duration} min</Text>
                 </View>
@@ -280,12 +340,10 @@ export default function StepsExecution() {
               {step.tips && step.tips.length > 0 && step.status === "in-progress" && (
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
-                    <Ionicons name="bulb" size={16} color="#0284C7" />
+                    <Ionicons name="bulb" size={16} color={Colors.light.primary} />
                     <Text style={styles.detailLabel}>Conseil</Text>
                     <View style={styles.rotatingTipContainer}>
-                      <Text style={styles.rotatingTipText}>
-                        {step.tips[currentTipIndex]?.tip || step.description}
-                      </Text>
+                      <Text style={styles.rotatingTipText}>{step.tips[currentTipIndex]?.tip || step.description}</Text>
                       {step.tips.length > 1 && (
                         <View style={styles.tipIndicator}>
                           <Text style={styles.tipIndicatorText}>
@@ -301,33 +359,14 @@ export default function StepsExecution() {
               {step.description && step.status !== "in-progress" && (
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
-                    <Ionicons name="information-circle" size={16} color="#64748B" />
+                    <Ionicons name="information-circle" size={16} color={Colors.light.icon} />
                     <Text style={styles.detailLabel}>Conseil</Text>
                     <Text style={styles.detailValue}>{step.description}</Text>
                   </View>
                 </View>
               )}
-
-              {step.tips && step.tips.length > 0 && step.status !== "in-progress" && (
-                <View style={styles.tipsContainer}>
-                  <View style={styles.tipsHeader}>
-                    <Ionicons name="bulb" size={16} color="#0284C7" />
-                    <Text style={styles.tipsTitle}>Conseils pratiques</Text>
-                  </View>
-                  {step.tips.map((tip) => (
-                    <View key={tip.id} style={styles.tipItem}>
-                      <Text style={styles.tipText}>• {tip.tip}</Text>
-                      {tip.description && <Text style={styles.tipDescription}>{tip.description}</Text>}
-                      {tip.pivot?.duration && (
-                        <Text style={styles.tipDuration}>Durée recommandée: {tip.pivot.duration}s</Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              )}
             </View>
 
-            {/* Timer Controls for Current Step */}
             {step.status === "in-progress" && (
               <View style={styles.timerControls}>
                 <TouchableOpacity
@@ -335,13 +374,21 @@ export default function StepsExecution() {
                   onPress={toggleTimer}
                   activeOpacity={0.8}
                 >
-                  <Ionicons name={isRunning ? "pause" : "play"} size={18} color="#FFFFFF" />
+                  <Ionicons name={isRunning ? "pause" : "play"} size={18} color={Colors.light.background} />
                   <Text style={styles.controlButtonText}>{isRunning ? "Pause" : "Reprendre"}</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.controlButton, styles.completeButton]}
+                  onPress={completeCurrentStep}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="checkmark" size={18} color={Colors.light.background} />
+                  <Text style={styles.controlButtonText}>Terminer</Text>
                 </TouchableOpacity>
               </View>
             )}
 
-            {/* Progress Bar for Current Step */}
             {step.status === "in-progress" && (
               <View style={styles.progressBarContainer}>
                 <View
@@ -361,18 +408,24 @@ export default function StepsExecution() {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="home" size={24} color="#0284C7" />
+          <Ionicons name="home" size={24} color={Colors.light.primary} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="mail-outline" size={24} color="#64748B" />
+          <Ionicons name="mail-outline" size={24} color={Colors.light.icon} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="person-outline" size={24} color="#64748B" />
+          <Ionicons name="person-outline" size={24} color={Colors.light.icon} />
         </TouchableOpacity>
       </View>
+
+      <StepCompletionModal
+        visible={showCompletionModal}
+        stepNumber={completedStep?.number || 0}
+        stepTitle={completedStep?.title || ""}
+        onContinue={handleModalContinue}
+      />
     </SafeAreaView>
   )
 }
@@ -380,31 +433,7 @@ export default function StepsExecution() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAFC", // Slate-50
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: "#FFFFFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0", // Slate-200
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  backButton: {
-    marginRight: 16,
-    padding: 4,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1E293B", // Slate-800
-    letterSpacing: -0.5,
+    backgroundColor: Colors.light.background,
   },
   content: {
     flex: 1,
@@ -419,14 +448,14 @@ const styles = StyleSheet.create({
   techniqueTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#0F172A", // Slate-900
+    color: Colors.light.text,
     marginBottom: 8,
     letterSpacing: -0.5,
     lineHeight: 34,
   },
   techniqueSubtitle: {
     fontSize: 16,
-    color: "#64748B", // Slate-500
+    color: Colors.light.icon,
     fontWeight: "500",
   },
   progressOverview: {
@@ -440,12 +469,12 @@ const styles = StyleSheet.create({
   stepsTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#1E293B",
+    color: Colors.light.text,
     flex: 1,
     marginLeft: 12,
   },
   progressBadge: {
-    backgroundColor: "#E0F2FE", // Sky-100
+    backgroundColor: Colors.light.secondary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
@@ -453,10 +482,10 @@ const styles = StyleSheet.create({
   progressText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#0284C7", // Sky-600
+    color: Colors.light.primary,
   },
   stepCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.light.background,
     borderRadius: 16,
     borderWidth: 2,
     marginBottom: 16,
@@ -490,7 +519,7 @@ const styles = StyleSheet.create({
   stepName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1E293B",
+    color: Colors.light.text,
     flex: 1,
     lineHeight: 24,
   },
@@ -502,7 +531,7 @@ const styles = StyleSheet.create({
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FEF3C7", // Amber-100
+    backgroundColor: "#FEF3C7",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 12,
@@ -511,7 +540,7 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#92400E", // Amber-800
+    color: "#92400E",
     fontFamily: "monospace",
   },
   statusBadge: {
@@ -537,22 +566,22 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#475569", // Slate-600
+    color: Colors.light.text,
     minWidth: 60,
   },
   detailValue: {
     fontSize: 14,
-    color: "#64748B",
+    color: Colors.light.icon,
     flex: 1,
     lineHeight: 20,
   },
   tipsContainer: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: "#F0F9FF", // Sky-50
+    backgroundColor: Colors.light.secondary,
     borderRadius: 12,
     borderLeftWidth: 4,
-    borderLeftColor: "#0284C7",
+    borderLeftColor: Colors.light.primary,
   },
   tipsHeader: {
     flexDirection: "row",
@@ -563,60 +592,61 @@ const styles = StyleSheet.create({
   tipsTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0284C7",
+    color: Colors.light.primary,
   },
   tipItem: {
     marginBottom: 8,
   },
   tipText: {
     fontSize: 14,
-    color: "#0369A1", // Sky-700
+    color: Colors.light.primary,
     fontWeight: "500",
     lineHeight: 20,
     marginBottom: 4,
   },
   tipDescription: {
     fontSize: 13,
-    color: "#0284C7",
+    color: Colors.light.primary,
     fontStyle: "italic",
     lineHeight: 18,
     paddingLeft: 12,
   },
   tipDuration: {
     fontSize: 12,
-    color: "#059669", // Emerald-600
+    color: Colors.lightGreen,
     fontWeight: "500",
     paddingLeft: 12,
     marginTop: 2,
   },
   timerControls: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginTop: 16,
+    gap: 12,
   },
   controlButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 8,
-    minWidth: 140,
+    minWidth: 120,
     justifyContent: "center",
   },
   pauseButton: {
-    backgroundColor: "#EF4444", // Red-500
+    backgroundColor: "#EF4444",
   },
   playButton: {
-    backgroundColor: "#059669", // Emerald-600
+    backgroundColor: Colors.lightGreen,
   },
-  controlButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
+  completeButton: {
+    backgroundColor: Colors.light.primary,
   },
   progressBarContainer: {
     height: 6,
-    backgroundColor: "#E2E8F0", // Slate-200
+    backgroundColor: Colors.light.secondary,
     borderRadius: 3,
     overflow: "hidden",
     marginTop: 16,
@@ -631,7 +661,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 16,
     paddingHorizontal: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: Colors.light.background,
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0",
     shadowColor: "#000",
@@ -652,12 +682,12 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
-    color: "#64748B",
+    color: Colors.light.icon,
     fontWeight: "500",
   },
   loadingTipsText: {
     fontSize: 12,
-    color: "#64748B",
+    color: Colors.light.icon,
     fontStyle: "italic",
     marginLeft: 8,
   },
@@ -672,13 +702,13 @@ const styles = StyleSheet.create({
   },
   rotatingTipText: {
     fontSize: 14,
-    color: "#0284C7",
+    color: Colors.light.primary,
     fontWeight: "500",
     flex: 1,
     lineHeight: 20,
   },
   tipIndicator: {
-    backgroundColor: "#E0F2FE",
+    backgroundColor: Colors.light.secondary,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -686,7 +716,7 @@ const styles = StyleSheet.create({
   },
   tipIndicatorText: {
     fontSize: 12,
-    color: "#0284C7",
+    color: Colors.light.primary,
     fontWeight: "600",
   },
 })
