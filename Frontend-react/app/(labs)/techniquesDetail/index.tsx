@@ -225,12 +225,12 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
   }
 
   const handleShare = () => {
-    console.log("Share technique:", technique?.name)
+    console.log("Share technique:", technique?.title)
     // TODO: Implement share functionality
   }
 
   const handleExport = () => {
-    console.log("Export technique:", technique?.name)
+    console.log("Export technique:", technique?.title)
     // TODO: Implement export functionality (PDF, etc.)
   }
 
