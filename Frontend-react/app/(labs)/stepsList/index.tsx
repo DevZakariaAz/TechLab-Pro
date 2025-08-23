@@ -1,11 +1,12 @@
 "use client"
 
+import { StyleSheet } from "react-native";
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { getTechniqueSteps, type StepTip } from "@/api/getTechniqueDetail"
-import { Stack } from "expo-router"
+import { getTechniqueSteps, getStepTips, type StepTip } from "@/api/getTechniqueDetail"
+console.log("StyleSheet:", StyleSheet);
 
 interface Step {
   id: number
@@ -26,19 +27,56 @@ export default function StepsExecution() {
 
   const [steps, setSteps] = useState<Step[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingTips, setLoadingTips] = useState(false)
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
   const [timer, setTimer] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
+  const [currentTipIndex, setCurrentTipIndex] = useState(0)
+
+  const fetchStepTips = async (stepId: number, stepIndex: number) => {
+    try {
+      setLoadingTips(true)
+      const tips = await getStepTips(stepId)
+      
+      setSteps(prevSteps => {
+        const newSteps = [...prevSteps]
+        newSteps[stepIndex] = {
+          ...newSteps[stepIndex],
+          tips: tips
+        }
+        return newSteps
+      })
+    } catch (error) {
+      console.error("Error fetching step tips:", error)
+    } finally {
+      setLoadingTips(false)
+    }
+  }
 
   useEffect(() => {
     let interval: NodeJS.Timeout
     if (isRunning && timer > 0) {
       interval = setInterval(() => {
         setTimer((timer) => timer - 1)
+        
+        const currentStep = steps[currentStepIndex]
+        if (currentStep && currentStep.tips && currentStep.tips.length > 1) {
+          const stepDurationInSeconds = currentStep.duration * 60
+          const timeElapsed = stepDurationInSeconds - timer
+          const tipDuration = Math.floor(stepDurationInSeconds / currentStep.tips.length)
+          const newTipIndex = Math.floor(timeElapsed / tipDuration)
+          
+          // Ensure we don't exceed the number of tips
+          const clampedTipIndex = Math.min(newTipIndex, currentStep.tips.length - 1)
+          
+          if (clampedTipIndex !== currentTipIndex) {
+            setCurrentTipIndex(clampedTipIndex)
+          }
+        }
       }, 1000)
     }
     return () => clearInterval(interval)
-  }, [isRunning, timer])
+  }, [isRunning, timer, currentStepIndex, steps])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -46,8 +84,9 @@ export default function StepsExecution() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleStepPress = (index: number) => {
+  const handleStepPress = async (index: number) => {
     setCurrentStepIndex(index)
+    setCurrentTipIndex(0)
     const newSteps = [...steps]
     for (let i = 0; i < index; i++) {
       newSteps[i].status = "completed"
@@ -59,6 +98,8 @@ export default function StepsExecution() {
     setSteps(newSteps)
     setTimer(newSteps[index].duration * 60)
     setIsRunning(true)
+    
+    await fetchStepTips(newSteps[index].id, index)
   }
 
   const toggleTimer = () => {
@@ -123,6 +164,8 @@ export default function StepsExecution() {
           if (transformedSteps.length > 0) {
             setTimer(transformedSteps[0].duration * 60)
             setIsRunning(true)
+            setCurrentTipIndex(0)
+            await fetchStepTips(transformedSteps[0].id, 0)
           }
         } catch (error) {
           console.error("Error fetching steps:", error)
@@ -148,21 +191,13 @@ export default function StepsExecution() {
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
-      <Stack.Screen
-      options={{
-          title: "Liste des Étapes",
-          headerTitleAlign: "center",
-          headerBackVisible: true,
-        // headerBackTitleVisible: false,
-          headerBackTitle: "",
-          headerStyle: { backgroundColor: "#fff" },
-          headerTitleStyle: {
-            fontSize: 18,
-            fontWeight: "600",
-            color: "#000",
-        },
-      }}
-      />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Ionicons name="chevron-back" size={24} color="#475569" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Instructions Détaillées</Text>
+      </View>
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Technique Title */}
         <View style={styles.titleSection}>
@@ -242,7 +277,28 @@ export default function StepsExecution() {
                 </View>
               </View>
 
-              {step.description && (
+              {step.tips && step.tips.length > 0 && step.status === "in-progress" && (
+                <View style={styles.detailRow}>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="bulb" size={16} color="#0284C7" />
+                    <Text style={styles.detailLabel}>Conseil</Text>
+                    <View style={styles.rotatingTipContainer}>
+                      <Text style={styles.rotatingTipText}>
+                        {step.tips[currentTipIndex]?.tip || step.description}
+                      </Text>
+                      {step.tips.length > 1 && (
+                        <View style={styles.tipIndicator}>
+                          <Text style={styles.tipIndicatorText}>
+                            {currentTipIndex + 1}/{step.tips.length}
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {step.description && step.status !== "in-progress" && (
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
                     <Ionicons name="information-circle" size={16} color="#64748B" />
@@ -252,8 +308,7 @@ export default function StepsExecution() {
                 </View>
               )}
 
-              {/* Tips Section */}
-              {step.tips && step.tips.length > 0 && (
+              {step.tips && step.tips.length > 0 && step.status !== "in-progress" && (
                 <View style={styles.tipsContainer}>
                   <View style={styles.tipsHeader}>
                     <Ionicons name="bulb" size={16} color="#0284C7" />
@@ -263,6 +318,9 @@ export default function StepsExecution() {
                     <View key={tip.id} style={styles.tipItem}>
                       <Text style={styles.tipText}>• {tip.tip}</Text>
                       {tip.description && <Text style={styles.tipDescription}>{tip.description}</Text>}
+                      {tip.pivot?.duration && (
+                        <Text style={styles.tipDuration}>Durée recommandée: {tip.pivot.duration}s</Text>
+                      )}
                     </View>
                   ))}
                 </View>
@@ -524,6 +582,13 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     paddingLeft: 12,
   },
+  tipDuration: {
+    fontSize: 12,
+    color: "#059669", // Emerald-600
+    fontWeight: "500",
+    paddingLeft: 12,
+    marginTop: 2,
+  },
   timerControls: {
     alignItems: "center",
     marginTop: 16,
@@ -590,7 +655,38 @@ const styles = StyleSheet.create({
     color: "#64748B",
     fontWeight: "500",
   },
+  loadingTipsText: {
+    fontSize: 12,
+    color: "#64748B",
+    fontStyle: "italic",
+    marginLeft: 8,
+  },
   bottomSpacing: {
     height: 20,
+  },
+  rotatingTipContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  rotatingTipText: {
+    fontSize: 14,
+    color: "#0284C7",
+    fontWeight: "500",
+    flex: 1,
+    lineHeight: 20,
+  },
+  tipIndicator: {
+    backgroundColor: "#E0F2FE",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginLeft: 8,
+  },
+  tipIndicatorText: {
+    fontSize: 12,
+    color: "#0284C7",
+    fontWeight: "600",
   },
 })
