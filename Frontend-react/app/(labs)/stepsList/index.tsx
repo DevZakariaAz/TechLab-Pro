@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
-import { getTechniqueSteps, getStepTips, type StepTip } from "@/api/getTechniqueDetail"
+import { getTechniqueSteps, getStepTips, type Step as ApiStep, type StepTip } from "@/api/getTechniqueDetail"
 import { Colors } from "@/constants/Colors"
 import StepCompletionModal from "@/app/(labs)/step-completion-modal"
 import { StyleSheet } from "react-native"
@@ -142,17 +142,55 @@ export default function StepsExecution() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
+  const isStepAccessible = (stepIndex: number) => {
+    // Can always access completed steps
+    if (steps[stepIndex]?.status === "completed") return true
+
+    // Can access current in-progress step
+    if (steps[stepIndex]?.status === "in-progress") return true
+
+    // Can only access the next step if current step is completed
+    if (stepIndex === currentStepIndex + 1) {
+      return steps[currentStepIndex]?.status === "completed"
+    }
+
+    // Cannot access future steps
+    return false
+  }
+
   const handleStepPress = async (index: number) => {
+    // Prevent access to non-accessible steps
+    if (!isStepAccessible(index)) {
+      return
+    }
+
+    // Only allow moving to next step if current is completed, or accessing completed/current steps
+    if (index > currentStepIndex && steps[currentStepIndex]?.status !== "completed") {
+      return
+    }
+
     setCurrentStepIndex(index)
     setCurrentTipIndex(0)
     const newSteps = [...steps]
-    for (let i = 0; i < index; i++) {
-      newSteps[i].status = "completed"
+
+    // Don't automatically mark previous steps as completed when going backwards
+    if (index <= currentStepIndex) {
+      // Just switch to the selected step without changing other statuses
+      for (let i = 0; i < newSteps.length; i++) {
+        if (i === index) {
+          newSteps[i].status = "in-progress"
+        } else if (newSteps[i].status === "in-progress") {
+          newSteps[i].status = "todo"
+        }
+      }
+    } else {
+      // Moving forward - only allowed if current step is completed
+      newSteps[index].status = "in-progress"
+      for (let i = index + 1; i < newSteps.length; i++) {
+        newSteps[i].status = "todo"
+      }
     }
-    newSteps[index].status = "in-progress"
-    for (let i = index + 1; i < newSteps.length; i++) {
-      newSteps[i].status = "todo"
-    }
+
     setSteps(newSteps)
     setTimer(newSteps[index].duration * 60)
     setIsRunning(true)
@@ -209,7 +247,7 @@ export default function StepsExecution() {
         try {
           setLoading(true)
           const apiSteps = await getTechniqueSteps(Number.parseInt(techniqueId))
-          const transformedSteps: Step[] = apiSteps.map((apiStep, index) => ({
+          const transformedSteps: Step[] = apiSteps.map((apiStep: ApiStep, index: number) => ({
             id: apiStep.id,
             title: apiStep.title,
             reactive: apiStep.reactive,
@@ -227,6 +265,7 @@ export default function StepsExecution() {
           }
         } catch (error) {
           console.error("Error fetching steps:", error)
+          setSteps([])
         } finally {
           setLoading(false)
         }
@@ -248,21 +287,22 @@ export default function StepsExecution() {
 
   return (
     <SafeAreaView style={styles.container}>
-          <Stack.Screen
-      options={{
-        title: "Instructions de la Technique",
-        headerTitleAlign: "center",
-        headerBackVisible: true,
-        headerBackTitle: "",
-        // headerBackTitleVisible: false,
-        headerStyle: { backgroundColor: "#fff" },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: "#000",
-        },
-      }}
-    />
+      <Stack.Screen
+        options={{
+            title: "Instructions de la Technique",
+            headerTitleAlign: "center",
+            headerBackVisible: true,
+            headerBackTitle: "",
+            // headerBackTitleVisible: false,
+            headerStyle: { backgroundColor: "#fff" },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: "600",
+              color: "#000",
+          },
+        }}
+      />
+
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.titleSection}>
@@ -291,17 +331,27 @@ export default function StepsExecution() {
                 borderColor: getStepStatusColor(step.status),
                 backgroundColor: step.status === "in-progress" ? "#FEFEFF" : "#FFFFFF",
                 transform: [{ scale: step.status === "in-progress" ? 1.02 : 1 }],
+                opacity: isStepAccessible(index) ? 1 : 0.5,
               },
             ]}
             onPress={() => handleStepPress(index)}
-            activeOpacity={0.7}
+            activeOpacity={isStepAccessible(index) ? 0.7 : 1}
+            disabled={!isStepAccessible(index)}
           >
             <View style={styles.stepHeader}>
               <View style={styles.stepTitleRow}>
                 <View style={[styles.stepBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
                   <Text style={[styles.stepNumber, { color: getStepStatusColor(step.status) }]}>{step.id}</Text>
+                  {!isStepAccessible(index) && (
+                    <View style={styles.lockOverlay}>
+                      <Ionicons name="lock-closed" size={12} color={Colors.light.icon} />
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.stepName}>{step.title}</Text>
+                {!isStepAccessible(index) && (
+                  <Ionicons name="lock-closed" size={16} color={Colors.light.icon} style={styles.lockIcon} />
+                )}
               </View>
 
               <View style={styles.statusRow}>
@@ -718,5 +768,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.primary,
     fontWeight: "600",
+  },
+  lockOverlay: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    backgroundColor: Colors.light.background,
+    borderRadius: 8,
+    padding: 2,
+  },
+  lockIcon: {
+    marginLeft: 8,
   },
 })
