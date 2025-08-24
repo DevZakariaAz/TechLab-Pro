@@ -1,6 +1,10 @@
+"use client"
+
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { Colors } from "@/constants/Colors"
+import { Audio } from "expo-av"
+import { useEffect, useRef } from "react"
 
 interface StepCompletionModalProps {
   visible: boolean
@@ -10,29 +14,83 @@ interface StepCompletionModalProps {
 }
 
 export default function StepCompletionModal({ visible, stepNumber, stepTitle, onContinue }: StepCompletionModalProps) {
+  const soundRef = useRef<Audio.Sound | null>(null)
+
+  useEffect(() => {
+    const playAlertSound = async () => {
+      if (visible) {
+        try {
+          if (soundRef.current) {
+            await soundRef.current.stopAsync()
+            await soundRef.current.unloadAsync()
+          }
+
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: "https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" },
+            {
+              shouldPlay: true,
+              isLooping: true,
+              volume: 0.8,
+            },
+          )
+          soundRef.current = sound
+        } catch (error) {
+          console.log("Error playing alert sound:", error)
+        }
+      } else {
+        if (soundRef.current) {
+          try {
+            await soundRef.current.stopAsync()
+            await soundRef.current.unloadAsync()
+            soundRef.current = null
+          } catch (error) {
+            console.log("Error stopping sound:", error)
+          }
+        }
+      }
+    }
+
+    playAlertSound()
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stopAsync().catch(() => {})
+        soundRef.current.unloadAsync().catch(() => {})
+      }
+    }
+  }, [visible])
+
+  const handleContinue = async () => {
+    if (soundRef.current) {
+      try {
+        await soundRef.current.stopAsync()
+        await soundRef.current.unloadAsync()
+        soundRef.current = null
+      } catch (error) {
+        console.log("Error stopping sound on continue:", error)
+      }
+    }
+    onContinue()
+  }
+
   return (
     <Modal visible={visible} transparent={true} animationType="fade" statusBarTranslucent={true}>
       <View style={styles.overlay}>
         <View style={styles.modalContainer}>
-          {/* Checkmark Icon */}
           <View style={styles.checkmarkContainer}>
             <Ionicons name="checkmark" size={40} color={Colors.lightGreen} />
           </View>
 
-          {/* Title */}
           <Text style={styles.title}>Étape terminée</Text>
 
-          {/* Step Info */}
           <Text style={styles.stepInfo}>
             <Text style={styles.stepNumber}>Étape {stepNumber} : </Text>
             <Text style={styles.stepTitle}>{stepTitle}</Text>
           </Text>
 
-          {/* Congratulations Message */}
           <Text style={styles.congratsMessage}>Félicitations ! Vous avez terminé cette étape avec succès</Text>
 
-          {/* Continue Button */}
-          <TouchableOpacity style={styles.continueButton} onPress={onContinue} activeOpacity={0.8}>
+          <TouchableOpacity style={styles.continueButton} onPress={handleContinue} activeOpacity={0.8}>
             <Text style={styles.continueButtonText}>Continuer</Text>
           </TouchableOpacity>
         </View>
