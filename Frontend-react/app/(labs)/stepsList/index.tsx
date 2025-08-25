@@ -458,7 +458,7 @@ export default function StepsExecution() {
         <View style={styles.bottomSpacing} />
       </ScrollView>
 
-      <View style={styles.bottomNav}>
+      {/* <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
           <Ionicons name="home" size={24} color={Colors.light.primary} />
         </TouchableOpacity>
@@ -469,10 +469,10 @@ export default function StepsExecution() {
           <Ionicons name="person-outline" size={24} color={Colors.light.icon} />
         </TouchableOpacity>
       </View>
-
+ */}
       <StepCompletionModal
         visible={showCompletionModal}
-        stepNumber={completedStep?.number || 0}
+        stepNumber={completedStep?.number || 0} 
         stepTitle={completedStep?.title || ""}
         onContinue={handleModalContinue}
       />
