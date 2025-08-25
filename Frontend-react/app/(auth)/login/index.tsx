@@ -1,90 +1,89 @@
-import { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  View,
-  Image,
-  Alert,
-} from 'react-native';
+"use client"
 
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link,Stack, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { login } from '@/api/login'; // Adjust this path as needed
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from "react"
+import { StyleSheet, TextInput, Text, TouchableOpacity, View, Image, Alert } from "react-native"
 
-WebBrowser.maybeCompleteAuthSession();
+import { SafeAreaView } from "react-native-safe-area-context"
+import { Link, Stack, useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
+import { login } from "@/api/login" 
+import * as Google from "expo-auth-session/providers/google"
+import * as WebBrowser from "expo-web-browser"
+import { useAuth } from "@/hooks/useAuth" 
+
+WebBrowser.maybeCompleteAuthSession()
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter()
+  const { loginUser } = useAuth() // Added useAuth hook
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   // Google login setup
   const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId: '519763398505-f0mjd88o47n1o0otrjv08d61n3hkmr3m.apps.googleusercontent.com',
-  });
-const fetchUserProfile = async (accessToken) => {
-  try {
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const userProfile = await response.json();
-    console.log('User Profile:', userProfile);
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-  }
-};
+    clientId: "519763398505-f0mjd88o47n1o0otrjv08d61n3hkmr3m.apps.googleusercontent.com",
+  })
 
-useEffect(() => {
-  if (response?.type === 'success') {
-    const { authentication } = response;
-    const { accessToken } = authentication;
-
-    if (accessToken) {
-      // Store the access token securely
-      console.log('Google Auth Success:', accessToken , );
-
-      // Optionally, fetch the user profile
-      fetchUserProfile(accessToken);
-
-      // Redirect to another page
-      router.replace('/(tabs)');
-    } else {
-      Alert.alert('Erreur', 'Token d\'authentification manquant.');
-    }
-  } else if (response?.type === 'error') {
-    const error = response?.error;
-    if (error) {
-      console.log('Google Auth Error:', error);
-      Alert.alert('Erreur de connexion Google', error?.message || 'Une erreur est survenue');
+  const fetchUserProfile = async (accessToken) => {
+    try {
+      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+      const userProfile = await response.json()
+      console.log("User Profile:", userProfile)
+      await loginUser(accessToken, userProfile)
+    } catch (error) {
+      console.error("Error fetching user profile:", error)
     }
   }
-}, [response]);
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      const { authentication } = response
+      const { accessToken } = authentication
+
+      if (accessToken) {
+        // Store the access token securely
+        console.log("Google Auth Success:", accessToken)
+
+        // Optionally, fetch the user profile
+        fetchUserProfile(accessToken)
+
+        // Redirect to another page
+        router.replace("/(tabs)")
+      } else {
+        Alert.alert("Erreur", "Token d'authentification manquant.")
+      }
+    } else if (response?.type === "error") {
+      const error = response?.error
+      if (error) {
+        console.log("Google Auth Error:", error)
+        Alert.alert("Erreur de connexion Google", error?.message || "Une erreur est survenue")
+      }
+    }
+  }, [response])
 
   // Normal login
-// Make handleLogin async to handle the promise correctly
-const handleLogin = async () => {
-  try {
-    const result = await login(email, password);
+  // Make handleLogin async to handle the promise correctly
+  const handleLogin = async () => {
+    try {
+      const result = await login(email, password)
 
-    if (result.success) {
-      console.log('Logged in:', result.user);
-      router.replace('/(tabs)');
-    } else {
-      Alert.alert('Erreur', result.message || 'Email ou mot de passe incorrect.');
+      if (result.success) {
+        console.log("Logged in:", result.user)
+        await loginUser(result.token, result.user)
+        router.replace("/(tabs)")
+      } else {
+        Alert.alert("Erreur", result.message || "Email ou mot de passe incorrect.")
+      }
+    } catch (error) {
+      console.error("Login failed:", error)
+      Alert.alert("Erreur", "Une erreur est survenue lors de la connexion.")
     }
-  } catch (error) {
-    console.error('Login failed:', error);
-    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion.');
   }
-};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,7 +121,7 @@ const handleLogin = async () => {
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
-              name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
               size={20}
               color="#999"
               style={styles.icon}
@@ -131,10 +130,9 @@ const handleLogin = async () => {
         </View>
 
         {/* Forgot password */}
-        {/* Forgot password */}
-      <Link href="/resetPassword">
-        <Text style={styles.forgot}>Mot de passe oublié?</Text>
-      </Link>
+        <Link href="/resetPassword">
+          <Text style={styles.forgot}>Mot de passe oublié?</Text>
+        </Link>
 
         {/* Login button */}
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -143,8 +141,10 @@ const handleLogin = async () => {
 
         {/* Register prompt */}
         <Text style={styles.registerPrompt}>
-          Vous n’avez pas de compte ?{' '}
-          <Link href="/register" style={styles.registerLink}>S'inscrire</Link>
+          Vous n'avez pas de compte ?{" "}
+          <Link href="/register" style={styles.registerLink}>
+            S'inscrire
+          </Link>
         </Text>
 
         {/* Divider */}
@@ -155,64 +155,57 @@ const handleLogin = async () => {
         </View>
 
         {/* Google Login Button */}
-        <TouchableOpacity
-          style={styles.googleButton}
-          disabled={!request}
-          onPress={() => promptAsync()}
-        >
-          <Image
-            source={require('@/assets/images/googleLogo.png')}
-            style={styles.googleLogo}
-          />
+        <TouchableOpacity style={styles.googleButton} disabled={!request} onPress={() => promptAsync()}>
+          <Image source={require("@/assets/images/googleLogo.png")} style={styles.googleLogo} />
           <Text style={styles.googleText}>Connectez-vous avec Google</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 24 },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 32 },
-  form: { width: '100%' },
+  container: { flex: 1, backgroundColor: "#fff", padding: 24 },
+  title: { fontSize: 22, fontWeight: "bold", textAlign: "center", marginBottom: 32 },
+  form: { width: "100%" },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F6F6F6',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F6F6F6",
     borderRadius: 30,
     paddingHorizontal: 15,
     marginBottom: 15,
   },
   icon: { marginRight: 8 },
   input: { flex: 1, height: 50, fontSize: 16 },
-  forgot: { color: '#1AA39D', alignSelf: 'flex-end', marginBottom: 24, fontSize: 14 },
+  forgot: { color: "#1AA39D", alignSelf: "flex-end", marginBottom: 24, fontSize: 14 },
   loginButton: {
-    backgroundColor: '#1AA39D',
+    backgroundColor: "#1AA39D",
     paddingVertical: 14,
     borderRadius: 30,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 16,
   },
-  loginText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  registerPrompt: { textAlign: 'center', fontSize: 14, marginBottom: 20 },
-  registerLink: { color: '#1AA39D', fontWeight: '500' },
+  loginText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  registerPrompt: { textAlign: "center", fontSize: 14, marginBottom: 20 },
+  registerLink: { color: "#1AA39D", fontWeight: "500" },
   dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 16,
   },
-  line: { flex: 1, height: 1, backgroundColor: '#ccc' },
-  or: { marginHorizontal: 8, color: '#999' },
+  line: { flex: 1, height: 1, backgroundColor: "#ccc" },
+  or: { marginHorizontal: 8, color: "#999" },
   googleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#ccc',
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 30,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   googleLogo: { width: 18, height: 18, marginRight: 8 },
-  googleText: { fontSize: 15, color: '#333' },
-});
+  googleText: { fontSize: 15, color: "#333" },
+})
