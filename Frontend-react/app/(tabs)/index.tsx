@@ -1,105 +1,83 @@
-import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  TextInput,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Make sure to install expo icons if not already done
-import { Stack, useRouter } from "expo-router";
+"use client"
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Image, TouchableOpacity, ScrollView } from "react-native"
+import { Ionicons } from "@expo/vector-icons" // Make sure to install expo icons if not already done
+import { Stack, useRouter } from "expo-router"
+import { AuthGuard } from "@/components/AuthGuard"
 
 export default function AccueilPage() {
-  const router = useRouter();
+  const router = useRouter()
+
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "Accueil",
-          headerBackVisible: false,
-          headerRight: () => (
-            <>
-              <TouchableOpacity style={styles.notificationIcon}>
-                <Ionicons
-                  name="notifications-outline"
-                  size={24}
-                  color="black"
-                  onclick={() => {router.push('/notifications')}}
-                />
-                <View style={styles.notificationBadge} />
-              </TouchableOpacity>
-            </>
-          ),
-        }}
-      />
-      <SafeAreaView style={styles.container}>
-
-        <View style={[styles.searchContainer, {marginTop: 30}]}>
-          <Ionicons
-            name="search-outline"
-            size={20}
-            color="#999"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Recherche"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <View style={styles.selectionContainer}>
-          <View style={styles.selectionHeader}>
-            <Ionicons name="bulb-outline" size={22} color="#999" />
-            <Text style={styles.selectionTitle}>
-              Sélectionnez votre laboratoire
-            </Text>
+    <AuthGuard>
+      <>
+        <Stack.Screen
+          options={{
+            title: "Accueil",
+            headerBackVisible: false,
+            headerRight: () => (
+              <>
+                <TouchableOpacity style={styles.notificationIcon}>
+                  <Ionicons
+                    name="notifications-outline"
+                    size={24}
+                    color="black"
+                    onClick={() => {
+                      router.push("/notifications")
+                    }}
+                  />
+                  <View style={styles.notificationBadge} />
+                </TouchableOpacity>
+              </>
+            ),
+          }}
+        />
+        <SafeAreaView style={styles.container}>
+          <View style={[styles.searchContainer, { marginTop: 30 }]}>
+            <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
+            <TextInput style={styles.searchInput} placeholder="Recherche" placeholderTextColor="#999" />
           </View>
 
-          <ScrollView
-            style={styles.labOptions}
-            showsVerticalScrollIndicator={false}
-          >
-            <TouchableOpacity style={styles.labCard} onPress={() => {router.push('/(labs)/techniquesList')}}>
-              <View style={styles.labInfo}>
-                <Text style={styles.labName}>Centre d'Analyse</Text>
-                <Text style={styles.labName}>Anatomopathologique</Text>
-              </View>
-              <Image
-                source={require('@/assets/images/lab1.png')}
-                style={styles.labImage}
-              />
-            </TouchableOpacity>
+          <View style={styles.selectionContainer}>
+            <View style={styles.selectionHeader}>
+              <Ionicons name="bulb-outline" size={22} color="#999" />
+              <Text style={styles.selectionTitle}>Sélectionnez votre laboratoire</Text>
+            </View>
 
-            <TouchableOpacity style={styles.labCard}>
-              <View style={styles.labInfo}>
-                <Text style={styles.labName}>Laboratoire d'Anatomie et</Text>
-                <Text style={styles.labName}>de Cytologie Pathologique</Text>
-              </View>
-              <Image
-                source={require('@/assets/images/lab2.png')}
-                style={styles.labImage}
-              />
-            </TouchableOpacity>
+            <ScrollView style={styles.labOptions} showsVerticalScrollIndicator={false}>
+              <TouchableOpacity
+                style={styles.labCard}
+                onPress={() => {
+                  router.push("/(labs)/techniquesList")
+                }}
+              >
+                <View style={styles.labInfo}>
+                  <Text style={styles.labName}>Centre d'Analyse</Text>
+                  <Text style={styles.labName}>Anatomopathologique</Text>
+                </View>
+                <Image source={require("@/assets/images/lab1.png")} style={styles.labImage} />
+              </TouchableOpacity>
 
-            <TouchableOpacity style={styles.labCard}>
-              <View style={styles.labInfo}>
-                <Text style={styles.labName}>Institut d'Histopathologie</Text>
-                <Text style={styles.labName}>et Cytodiagnostic</Text>
-              </View>
-              <Image
-                source={require('@/assets/images/lab3.png')}
-                style={styles.labImage}
-              />
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
-      </SafeAreaView>
-    </>
-  );
+              <TouchableOpacity style={styles.labCard}>
+                <View style={styles.labInfo}>
+                  <Text style={styles.labName}>Laboratoire d'Anatomie et</Text>
+                  <Text style={styles.labName}>de Cytologie Pathologique</Text>
+                </View>
+                <Image source={require("@/assets/images/lab2.png")} style={styles.labImage} />
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.labCard}>
+                <View style={styles.labInfo}>
+                  <Text style={styles.labName}>Institut d'Histopathologie</Text>
+                  <Text style={styles.labName}>et Cytodiagnostic</Text>
+                </View>
+                <Image source={require("@/assets/images/lab3.png")} style={styles.labImage} />
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </SafeAreaView>
+      </>
+    </AuthGuard>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -202,4 +180,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+})
