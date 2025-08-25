@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, Stack } from "expo-router"
+import { useAuth } from "@/hooks/useAuth"
 
 import { getTechniques } from "@/api/getTechniques"
 import { getCategories } from "@/api/getCategories"
@@ -28,6 +29,8 @@ const StainingTechniquesApp = () => {
   const colors = Colors[colorScheme]
   const router = useRouter()
 
+  const { isAuthenticated, loading: authLoading, user } = useAuth()
+
   const [techniques, setTechniques] = useState([])
   const [categories, setCategories] = useState([])
   const [categoryMap, setCategoryMap] = useState({})
@@ -36,6 +39,15 @@ const StainingTechniquesApp = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.replace("/login")
+      return
+    }
+  }, [authLoading, isAuthenticated, router])
+
+  useEffect(() => {
+    if (!isAuthenticated || authLoading) return
+
     const fetchData = async () => {
       const [techniquesResult, categoriesResult] = await Promise.all([getTechniques(), getCategories()])
 
@@ -61,7 +73,22 @@ const StainingTechniquesApp = () => {
     }
 
     fetchData()
-  }, [])
+  }, [isAuthenticated, authLoading])
+
+  if (authLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.lightGreen} />
+          <Text style={[styles.loadingText, { color: colors.text }]}>Vérification de l'authentification...</Text>
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
 
   const filteredTechniques = techniques.filter((technique) => {
     let matchesCategory = false
@@ -70,10 +97,8 @@ const StainingTechniquesApp = () => {
       matchesCategory = true
     } else {
       if (technique.category_id) {
-        // Convert both to strings for consistent comparison
         matchesCategory = technique.category_id.toString() === activeCategory.toString()
       } else if (technique.category) {
-        // Fallback for techniques with category names instead of IDs
         const categoryName = technique.category.toLowerCase()
         const activeCategoryName = categories
           .find((cat) => cat.id.toString() === activeCategory.toString())
@@ -171,6 +196,7 @@ const StainingTechniquesApp = () => {
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={[styles.headerTitle, { color: colors.text }]}>Techniques de Coloration</Text>
+          {user && <Text style={[styles.welcomeText, { color: colors.icon }]}>Bonjour, {user.name}</Text>}
         </View>
 
         <View
@@ -267,6 +293,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  welcomeText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   settingsButton: {
     width: 40,
