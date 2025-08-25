@@ -8,6 +8,7 @@ import { useState, useEffect } from "react"
 import { getTechniqueDetail, getTechniqueSteps, type TechniqueDetail, type Step } from "@/api/getTechniqueDetail"
 import { getCategories, type Category } from "@/api/getCategories"
 import { router } from "expo-router"
+import { AuthGuard } from "@/components/AuthGuard"
 
 // const StarRating = ({
 //   rating,
@@ -261,66 +262,75 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
   }
 
   if (loading) {
-    return <LoadingState />
+    return (
+      <AuthGuard>
+        <LoadingState />
+      </AuthGuard>
+    )
   }
 
   if (error && !technique) {
-    return <ErrorState error={error} onRetry={handleRetry} />
+    return (
+      <AuthGuard>
+        <ErrorState error={error} onRetry={handleRetry} />
+      </AuthGuard>
+    )
   }
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: "Détails de Technique",
-          headerTitleAlign: "center",
-          headerBackVisible: true,
-          headerBackTitle: "",
-          // headerBackTitleVisible: false,
-          headerStyle: { backgroundColor: "#fff" },
-          headerTitleStyle: {
-            fontSize: 18,
-            fontWeight: "600",
-            color: "#000",
-          },
-        }}
-      />
-      <SafeAreaView style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Image
-            source={technique?.image ? { uri: technique.image } : require("@/assets/images/technique.png")}
-            style={styles.heroImage}
-          />
+    <AuthGuard>
+      <>
+        <Stack.Screen
+          options={{
+            title: "Détails de Technique",
+            headerTitleAlign: "center",
+            headerBackVisible: true,
+            headerBackTitle: "",
+            headerStyle: { backgroundColor: "#fff" },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: "600",
+              color: "#000",
+            },
+          }}
+        />
+        <SafeAreaView style={styles.container}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Image
+              source={technique?.image ? { uri: technique.image } : require("@/assets/images/technique.png")}
+              style={styles.heroImage}
+            />
 
-          <TechniqueHeader technique={technique} categoryName={getCategoryName()} />
+            <TechniqueHeader technique={technique} categoryName={getCategoryName()} />
 
-          <View style={styles.descriptionSection}>
-            <Text style={styles.sectionTitle}>Description de la Technique :</Text>
-            <Text style={styles.descriptionText}>{technique?.description || "Aucune description disponible"}</Text>
-          </View>
+            <View style={styles.descriptionSection}>
+              <Text style={styles.sectionTitle}>Description de la Technique :</Text>
+              <Text style={styles.descriptionText}>{technique?.description || "Aucune description disponible"}</Text>
+            </View>
 
-          <View style={styles.stepsSection}>
-            <Text style={styles.sectionTitle}>Liste des Étapes :</Text>
-            {steps.length > 0 ? (
-              steps.map((step, index) => (
-                <TechDetailStep
-                  key={step.id}
-                  stepTitle={step.title}
-                  stepDuration={step.duration}
-                  stepNumber={(index + 1).toString()}
-                  onPress={() => handleStepPress(step.id)}
-                />
-              ))
-            ) : (
-              <Text style={styles.noStepsText}>Aucune étape disponible</Text>
-            )}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+            <View style={styles.stepsSection}>
+              <Text style={styles.sectionTitle}>Liste des Étapes :</Text>
+              {steps.length > 0 ? (
+                steps.map((step, index) => (
+                  <TechDetailStep
+                    key={step.id}
+                    stepTitle={step.title}
+                    stepDuration={step.duration}
+                    stepNumber={(index + 1).toString()}
+                    onPress={() => handleStepPress(step.id)}
+                  />
+                ))
+              ) : (
+                <Text style={styles.noStepsText}>Aucune étape disponible</Text>
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
 
-      {/* Updated BottomActions to include export instead of edit */}
-      <BottomActions onShare={handleShare} onExport={handleExport} onStart={handleStart} />
-    </>
+        {/* Updated BottomActions to include export instead of edit */}
+        <BottomActions onShare={handleShare} onExport={handleExport} onStart={handleStart} />
+      </>
+    </AuthGuard>
   )
 }
 
