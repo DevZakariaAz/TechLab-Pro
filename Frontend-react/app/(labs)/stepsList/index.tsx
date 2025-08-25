@@ -1,13 +1,95 @@
 "use client"
 import { useState, useEffect } from "react"
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from "react-native"
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, StyleSheet } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Ionicons } from "@expo/vector-icons"
 import { getTechniqueSteps, getStepTips, type Step as ApiStep, type StepTip } from "@/api/getTechniqueDetail"
 import { Colors } from "@/constants/Colors"
-import StepCompletionModal from "@/app/(labs)/step-completion-modal"
-import { StyleSheet } from "react-native"
 import { Stack } from "expo-router"
+import { AuthGuard } from "@/components/AuthGuard"
+
+const StepCompletionModal = ({
+  visible,
+  stepNumber,
+  stepTitle,
+  onContinue,
+}: {
+  visible: boolean
+  stepNumber: number
+  stepTitle: string
+  onContinue: () => void
+}) => {
+  if (!visible) return null
+
+  return (
+    <View style={modalStyles.overlay}>
+      <View style={modalStyles.modal}>
+        <View style={modalStyles.iconContainer}>
+          <Ionicons name="checkmark-circle" size={64} color="#10B981" />
+        </View>
+        <Text style={modalStyles.title}>Étape {stepNumber} Terminée!</Text>
+        <Text style={modalStyles.subtitle}>{stepTitle}</Text>
+        <TouchableOpacity style={modalStyles.button} onPress={onContinue}>
+          <Text style={modalStyles.buttonText}>Continuer</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  )
+}
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    marginHorizontal: 32,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  iconContainer: {
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1F2937",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    color: "#6B7280",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  button: {
+    backgroundColor: "#10B981",
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "white",
+  },
+})
+
 interface Step {
   id: number
   title: string
@@ -277,206 +359,184 @@ export default function StepsExecution() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Chargement des étapes...</Text>
-        </View>
-      </SafeAreaView>
+      <AuthGuard>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.loadingContainer}>
+            <Text style={styles.loadingText}>Chargement des étapes...</Text>
+          </View>
+        </SafeAreaView>
+      </AuthGuard>
     )
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen
-        options={{
+    <AuthGuard>
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen
+          options={{
             title: "Instructions de la Technique",
             headerTitleAlign: "center",
             headerBackVisible: true,
             headerBackTitle: "",
-            // headerBackTitleVisible: false,
             headerStyle: { backgroundColor: "#fff" },
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: "600",
               color: "#000",
-          },
-        }}
-      />
+            },
+          }}
+        />
 
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <View style={styles.titleSection}>
+            <Text style={styles.techniqueTitle}>{techniqueName || "Technique de Laboratoire"}</Text>
+            <Text style={styles.techniqueSubtitle}>Colorations Histologiques de Base</Text>
+          </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.titleSection}>
-          <Text style={styles.techniqueTitle}>{techniqueName || "Technique de Laboratoire"}</Text>
-          <Text style={styles.techniqueSubtitle}>Colorations Histologiques de Base</Text>
-        </View>
-
-        <View style={styles.progressOverview}>
-          <View style={styles.progressHeader}>
-            <Ionicons name="list" size={22} color={Colors.light.primary} />
-            <Text style={styles.stepsTitle}>Liste des Étapes</Text>
-            <View style={styles.progressBadge}>
-              <Text style={styles.progressText}>
-                {currentStepIndex + 1}/{steps.length}
-              </Text>
+          <View style={styles.progressOverview}>
+            <View style={styles.progressHeader}>
+              <Ionicons name="list" size={22} color={Colors.light.primary} />
+              <Text style={styles.stepsTitle}>Liste des Étapes</Text>
+              <View style={styles.progressBadge}>
+                <Text style={styles.progressText}>
+                  {currentStepIndex + 1}/{steps.length}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {steps.map((step, index) => (
-          <TouchableOpacity
-            key={step.id}
-            style={[
-              styles.stepCard,
-              {
-                borderColor: getStepStatusColor(step.status),
-                backgroundColor: step.status === "in-progress" ? "#FEFEFF" : "#FFFFFF",
-                transform: [{ scale: step.status === "in-progress" ? 1.02 : 1 }],
-                opacity: isStepAccessible(index) ? 1 : 0.5,
-              },
-            ]}
-            onPress={() => handleStepPress(index)}
-            activeOpacity={isStepAccessible(index) ? 0.7 : 1}
-            disabled={!isStepAccessible(index)}
-          >
-            <View style={styles.stepHeader}>
-              <View style={styles.stepTitleRow}>
-                <View style={[styles.stepBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
-                  <Text style={[styles.stepNumber, { color: getStepStatusColor(step.status) }]}>{step.id}</Text>
+          {steps.map((step, index) => (
+            <TouchableOpacity
+              key={step.id}
+              style={[
+                styles.stepCard,
+                {
+                  borderColor: getStepStatusColor(step.status),
+                  backgroundColor: step.status === "in-progress" ? "#FEFEFF" : "#FFFFFF",
+                  transform: [{ scale: step.status === "in-progress" ? 1.02 : 1 }],
+                  opacity: isStepAccessible(index) ? 1 : 0.5,
+                },
+              ]}
+              onPress={() => handleStepPress(index)}
+              activeOpacity={isStepAccessible(index) ? 0.7 : 1}
+              disabled={!isStepAccessible(index)}
+            >
+              <View style={styles.stepHeader}>
+                <View style={styles.stepTitleRow}>
+                  <View style={[styles.stepBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
+                    <Text style={[styles.stepNumber, { color: getStepStatusColor(step.status) }]}>{step.id}</Text>
+                    {!isStepAccessible(index) && (
+                      <View style={styles.lockOverlay}>
+                        <Ionicons name="lock-closed" size={12} color={Colors.light.icon} />
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.stepName}>{step.title}</Text>
                   {!isStepAccessible(index) && (
-                    <View style={styles.lockOverlay}>
-                      <Ionicons name="lock-closed" size={12} color={Colors.light.icon} />
-                    </View>
+                    <Ionicons name="lock-closed" size={16} color={Colors.light.icon} style={styles.lockIcon} />
                   )}
                 </View>
-                <Text style={styles.stepName}>{step.title}</Text>
-                {!isStepAccessible(index) && (
-                  <Ionicons name="lock-closed" size={16} color={Colors.light.icon} style={styles.lockIcon} />
-                )}
-              </View>
 
-              <View style={styles.statusRow}>
-                {step.status === "in-progress" && (
-                  <View style={styles.timerContainer}>
-                    <Ionicons name="time" size={16} color={Colors.light.primary} />
-                    <Text style={styles.timerText}>{formatTime(timer)}</Text>
+                <View style={styles.statusRow}>
+                  {step.status === "in-progress" && (
+                    <View style={styles.timerContainer}>
+                      <Ionicons name="time" size={16} color={Colors.light.primary} />
+                      <Text style={styles.timerText}>{formatTime(timer)}</Text>
+                    </View>
+                  )}
+
+                  <View style={[styles.statusBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
+                    <Text style={[styles.statusText, { color: getStepStatusColor(step.status) }]}>
+                      {getStepStatusText(step.status)}
+                    </Text>
                   </View>
-                )}
-
-                <View style={[styles.statusBadge, { backgroundColor: getStepStatusBgColor(step.status) }]}>
-                  <Text style={[styles.statusText, { color: getStepStatusColor(step.status) }]}>
-                    {getStepStatusText(step.status)}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.stepDetails}>
-              <View style={styles.detailRow}>
-                <View style={styles.detailItem}>
-                  <Ionicons name="flask" size={16} color={Colors.light.icon} />
-                  <Text style={styles.detailLabel}>Réactif</Text>
-                  <Text style={styles.detailValue}>{step.reactive}</Text>
                 </View>
               </View>
 
-              <View style={styles.detailRow}>
-                <View style={styles.detailItem}>
-                  <Ionicons name="timer" size={16} color={Colors.light.icon} />
-                  <Text style={styles.detailLabel}>Durée</Text>
-                  <Text style={styles.detailValue}>{step.duration} min</Text>
-                </View>
-              </View>
-
-              {step.tips && step.tips.length > 0 && step.status === "in-progress" && (
+              <View style={styles.stepDetails}>
                 <View style={styles.detailRow}>
                   <View style={styles.detailItem}>
-                    <Ionicons name="bulb" size={16} color={Colors.light.primary} />
-                    <Text style={styles.detailLabel}>Conseil</Text>
-                    <View style={styles.rotatingTipContainer}>
-                      <Text style={styles.rotatingTipText}>{step.tips[currentTipIndex]?.tip || step.description}</Text>
-                      {step.tips.length > 1 && (
-                        <View style={styles.tipIndicator}>
-                          <Text style={styles.tipIndicatorText}>
-                            {currentTipIndex + 1}/{step.tips.length}
-                          </Text>
-                        </View>
-                      )}
+                    <Ionicons name="flask" size={16} color={Colors.light.icon} />
+                    <Text style={styles.detailLabel}>Réactif</Text>
+                    <Text style={styles.detailValue}>{step.reactive}</Text>
+                  </View>
+                </View>
+
+                <View style={styles.detailRow}>
+                  <View style={styles.detailItem}>
+                    <Ionicons name="timer" size={16} color={Colors.light.icon} />
+                    <Text style={styles.detailLabel}>Durée</Text>
+                    <Text style={styles.detailValue}>{step.duration} min</Text>
+                  </View>
+                </View>
+
+                {step.tips && step.tips.length > 0 && step.status === "in-progress" && (
+                  <View style={styles.detailRow}>
+                    <View style={styles.detailItem}>
+                      <Ionicons name="bulb" size={16} color={Colors.light.primary} />
+                      <Text style={styles.detailLabel}>Conseil</Text>
+                      <View style={styles.rotatingTipContainer}>
+                        <Text style={styles.rotatingTipText}>{step.tips[currentTipIndex]?.tip || step.description}</Text>
+                        {step.tips.length > 1 && (
+                          <View style={styles.tipIndicator}>
+                            <Text style={styles.tipIndicatorText}>
+                              {currentTipIndex + 1}/{step.tips.length}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
                     </View>
                   </View>
-                </View>
-              )}
+                )}
 
-              {step.description && step.status !== "in-progress" && (
-                <View style={styles.detailRow}>
-                  <View style={styles.detailItem}>
-                    <Ionicons name="information-circle" size={16} color={Colors.light.icon} />
-                    <Text style={styles.detailLabel}>Conseil</Text>
-                    <Text style={styles.detailValue}>{step.description}</Text>
+                {step.description && step.status !== "in-progress" && (
+                  <View style={styles.detailRow}>
+                    <View style={styles.detailItem}>
+                      <Ionicons name="information-circle" size={16} color={Colors.light.icon} />
+                      <Text style={styles.detailLabel}>Conseil</Text>
+                      <Text style={styles.detailValue}>{step.description}</Text>
+                    </View>
                   </View>
+                )}
+              </View>
+
+              {step.status === "in-progress" && (
+                <View style={styles.timerControls}>
+                  <TouchableOpacity style={[styles.controlButton, isRunning ? styles.pauseButton : styles.playButton]} onPress={toggleTimer} activeOpacity={0.8}>
+                    <Ionicons name={isRunning ? "pause" : "play"} size={18} color={Colors.light.background} />
+                    <Text style={styles.controlButtonText}>{isRunning ? "Pause" : "Reprendre"}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={[styles.controlButton, styles.completeButton]} onPress={completeCurrentStep} activeOpacity={0.8}>
+                    <Ionicons name="checkmark" size={18} color={Colors.light.background} />
+                    <Text style={styles.controlButtonText}>Terminer</Text>
+                  </TouchableOpacity>
                 </View>
               )}
-            </View>
 
-            {step.status === "in-progress" && (
-              <View style={styles.timerControls}>
-                <TouchableOpacity
-                  style={[styles.controlButton, isRunning ? styles.pauseButton : styles.playButton]}
-                  onPress={toggleTimer}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name={isRunning ? "pause" : "play"} size={18} color={Colors.light.background} />
-                  <Text style={styles.controlButtonText}>{isRunning ? "Pause" : "Reprendre"}</Text>
-                </TouchableOpacity>
+              {step.status === "in-progress" && (
+                <View style={styles.progressBarContainer}>
+                  <View
+                    style={[
+                      styles.progressBar,
+                      {
+                        width: `${Math.max(0, ((step.duration * 60 - timer) / (step.duration * 60)) * 100)}%`,
+                        backgroundColor: getStepStatusColor(step.status),
+                      },
+                    ]}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
 
-                <TouchableOpacity
-                  style={[styles.controlButton, styles.completeButton]}
-                  onPress={completeCurrentStep}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="checkmark" size={18} color={Colors.light.background} />
-                  <Text style={styles.controlButtonText}>Terminer</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+          <View style={styles.bottomSpacing} />
+        </ScrollView>
 
-            {step.status === "in-progress" && (
-              <View style={styles.progressBarContainer}>
-                <View
-                  style={[
-                    styles.progressBar,
-                    {
-                      width: `${Math.max(0, ((step.duration * 60 - timer) / (step.duration * 60)) * 100)}%`,
-                      backgroundColor: getStepStatusColor(step.status),
-                    },
-                  ]}
-                />
-              </View>
-            )}
-          </TouchableOpacity>
-        ))}
-
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
-
-      {/* <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="home" size={24} color={Colors.light.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="mail-outline" size={24} color={Colors.light.icon} />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-          <Ionicons name="person-outline" size={24} color={Colors.light.icon} />
-        </TouchableOpacity>
-      </View>
- */}
-      <StepCompletionModal
-        visible={showCompletionModal}
-        stepNumber={completedStep?.number || 0} 
-        stepTitle={completedStep?.title || ""}
-        onContinue={handleModalContinue}
-      />
-    </SafeAreaView>
+        {/* Added StepCompletionModal component */}
+        <StepCompletionModal visible={showCompletionModal} stepNumber={completedStep?.number || 0} stepTitle={completedStep?.title || ""} onContinue={handleModalContinue} />
+      </SafeAreaView>
+    </AuthGuard>
   )
 }
 
@@ -625,49 +685,6 @@ const styles = StyleSheet.create({
     flex: 1,
     lineHeight: 20,
   },
-  tipsContainer: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: Colors.light.secondary,
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.light.primary,
-  },
-  tipsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-    gap: 8,
-  },
-  tipsTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: Colors.light.primary,
-  },
-  tipItem: {
-    marginBottom: 8,
-  },
-  tipText: {
-    fontSize: 14,
-    color: Colors.light.primary,
-    fontWeight: "500",
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  tipDescription: {
-    fontSize: 13,
-    color: Colors.light.primary,
-    fontStyle: "italic",
-    lineHeight: 18,
-    paddingLeft: 12,
-  },
-  tipDuration: {
-    fontSize: 12,
-    color: Colors.lightGreen,
-    fontWeight: "500",
-    paddingLeft: 12,
-    marginTop: 2,
-  },
   timerControls: {
     flexDirection: "row",
     alignItems: "center",
@@ -704,42 +721,6 @@ const styles = StyleSheet.create({
   progressBar: {
     height: "100%",
     borderRadius: 3,
-  },
-  bottomNav: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    backgroundColor: Colors.light.background,
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  navButton: {
-    padding: 12,
-    borderRadius: 12,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-  },
-  loadingText: {
-    fontSize: 18,
-    color: Colors.light.icon,
-    fontWeight: "500",
-  },
-  loadingTipsText: {
-    fontSize: 12,
-    color: Colors.light.icon,
-    fontStyle: "italic",
-    marginLeft: 8,
   },
   bottomSpacing: {
     height: 20,
@@ -779,5 +760,16 @@ const styles = StyleSheet.create({
   },
   lockIcon: {
     marginLeft: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: Colors.light.icon,
+    fontWeight: "500",
   },
 })
