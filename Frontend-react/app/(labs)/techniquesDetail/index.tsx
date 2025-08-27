@@ -5,35 +5,14 @@ import { Stack } from "expo-router"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useState, useEffect } from "react"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { getTechniqueDetail, getTechniqueSteps, type TechniqueDetail, type Step } from "@/api/getTechniqueDetail"
 import { getCategories, type Category } from "@/api/getCategories"
 import { router } from "expo-router"
 import { AuthGuard } from "@/components/AuthGuard"
+import RestartTechniqueModal from "@/components/RestartTechniqueModal"
 
-// const StarRating = ({
-//   rating,
-//   size = 20,
-//   color = "#199A8E",
-// }: {
-//   rating: number
-//   size?: number
-//   color?: string
-// }) => {
-//   return (
-//     <View style={styles.ratingContainer}>
-//       {[1, 2, 3, 4, 5].map((star) => (
-//         <Ionicons
-//           key={star}
-//           name={star <= rating ? "star" : "star-outline"}
-//           size={size}
-//           color={color}
-//           style={styles.star}
-//         />
-//       ))}
-//       <Text style={[styles.ratingText, { color }]}>{rating.toFixed(1)}</Text>
-//     </View>
-//   )
-// }
+const TECHNIQUE_PROGRESS_KEY = "technique_progress";
 
 const TechDetailStep = ({
   stepTitle,
@@ -67,13 +46,8 @@ const LoadingState = () => (
         headerTitleAlign: "center",
         headerBackVisible: true,
         headerBackTitle: "",
-        // headerBackTitleVisible: false,
         headerStyle: { backgroundColor: "#fff" },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: "#000",
-        },
+        headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
       }}
     />
     <SafeAreaView style={styles.container}>
@@ -93,13 +67,8 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
         headerTitleAlign: "center",
         headerBackVisible: true,
         headerBackTitle: "",
-        // headerBackTitleVisible: false,
         headerStyle: { backgroundColor: "#fff" },
-        headerTitleStyle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: "#000",
-        },
+        headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
       }}
     />
     <SafeAreaView style={styles.container}>
@@ -114,17 +83,10 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
   </>
 )
 
-const TechniqueHeader = ({
-  technique,
-  categoryName,
-}: {
-  technique: TechniqueDetail | null
-  categoryName: string
-}) => (
+const TechniqueHeader = ({ technique, categoryName }: { technique: TechniqueDetail | null; categoryName: string }) => (
   <View style={styles.techniqueInfo}>
     <Text style={styles.title}>{technique?.title || "Chargement du titre..."}</Text>
     <Text style={styles.category}>{categoryName}</Text>
-    {/* <StarRating rating={technique?.rating || 0} /> */}
   </View>
 )
 
@@ -132,10 +94,12 @@ const BottomActions = ({
   onShare,
   onExport,
   onStart,
+  progress,
 }: {
   onShare: () => void
   onExport: () => void
   onStart: () => void
+  progress: 'not_started' | 'started' | 'finished'
 }) => (
   <View style={styles.bottomNavigation}>
     <TouchableOpacity style={styles.actionButton} onPress={onShare}>
@@ -146,8 +110,14 @@ const BottomActions = ({
       <Ionicons name="download-outline" size={24} color="#666" />
       <Text style={styles.actionButtonText}>Exporter</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.startButton} onPress={onStart}>
-      <Text style={styles.startButtonText}>Démarrer</Text>
+    <TouchableOpacity
+      style={[styles.startButton, progress === 'finished' && { backgroundColor: '#999' }]}
+      onPress={onStart}
+      disabled={false} // always clickable, even if finished
+    >
+      <Text style={styles.startButtonText}>
+        {progress === 'not_started' ? 'Démarrer' : progress === 'started' ? 'Terminer' : 'Recommencer'}
+      </Text>
     </TouchableOpacity>
   </View>
 )
@@ -158,124 +128,115 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState<'not_started' | 'started' | 'finished'>('not_started')
+  const [showRestartModal, setShowRestartModal] = useState(false)
+
+  // AsyncStorage helpers
+  const loadProgress = async (techId: number) => {
+    try {
+      const data = await AsyncStorage.getItem(TECHNIQUE_PROGRESS_KEY)
+      if (data) {
+        const obj = JSON.parse(data)
+        if (obj[techId]) setProgress(obj[techId])
+      }
+    } catch (err) {
+      console.log("Error loading progress:", err)
+    }
+  }
+
+  const startTechnique = async (techId: number) => {
+    try {
+      const data = await AsyncStorage.getItem(TECHNIQUE_PROGRESS_KEY)
+      const obj = data ? JSON.parse(data) : {}
+      obj[techId] = 'started'
+      await AsyncStorage.setItem(TECHNIQUE_PROGRESS_KEY, JSON.stringify(obj))
+      setProgress('started')
+    } catch (err) {
+      console.log("Error starting technique:", err)
+    }
+  }
+
+  const finishTechnique = async (techId: number) => {
+    try {
+      const data = await AsyncStorage.getItem(TECHNIQUE_PROGRESS_KEY)
+      const obj = data ? JSON.parse(data) : {}
+      obj[techId] = 'finished'
+      await AsyncStorage.setItem(TECHNIQUE_PROGRESS_KEY, JSON.stringify(obj))
+      setProgress('finished')
+    } catch (err) {
+      console.log("Error finishing technique:", err)
+    }
+  }
 
   const fetchTechniqueData = async () => {
     try {
       setLoading(true)
       setError(null)
-
       const numericId = Number.parseInt(techniqueId, 10)
-
       const [techniqueData, stepsData, categoriesData] = await Promise.all([
         getTechniqueDetail(numericId),
         getTechniqueSteps(numericId),
         getCategories(),
       ])
-
-      console.log("Technique data received:", techniqueData)
-      console.log("Categories response received:", categoriesData)
-
       setTechnique(techniqueData)
       setSteps(stepsData.sort((a, b) => a.order - b.order))
       setCategories(categoriesData.categories || [])
     } catch (err) {
       console.error("Error fetching technique data:", err)
       setError("Erreur lors du chargement des données")
-
-      const fallbackTechnique = {
-        id: Number.parseInt(techniqueId, 10),
-        name: "Hématoxyline-Éosine (H&E)",
-        title: "Hématoxyline-Éosine (H&E)",
-        description:
-          "La coloration de Gram permet de différencier les bactéries en fonction de la composition de leur paroi cellulaire",
-        category_id: 1,
-        category: { id: 1, name: "Colorations Histologiques de Base" },
-        rating: 4.0,
-        created_at: "",
-        updated_at: "",
-      }
-
-      const fallbackCategories = [{ id: 1, name: "Colorations Histologiques de Base", created_at: "", updated_at: "" }]
-
-      console.log("Using fallback data:", fallbackTechnique)
-      setTechnique(fallbackTechnique)
-      setCategories(fallbackCategories)
     } finally {
       setLoading(false)
     }
   }
 
-  useEffect(() => {
-    fetchTechniqueData()
-  }, [techniqueId])
+  useEffect(() => { fetchTechniqueData() }, [techniqueId])
+  useEffect(() => { if (technique?.id) loadProgress(technique.id) }, [technique])
 
   const getCategoryName = (): string => {
-    if (technique?.category?.name) {
-      return technique.category.name
-    }
-
+    if (technique?.category?.name) return technique.category.name
     if (technique?.category_id && categories.length > 0) {
       const category = categories.find((cat) => cat.id.toString() === technique.category_id.toString())
-      if (category?.name) {
-        return category.name
-      }
+      if (category?.name) return category.name
     }
-
-    console.log("No category found, using default")
     return "Catégorie non spécifiée"
   }
 
-  const handleShare = () => {
-    console.log("Share technique:", technique?.title)
-    // TODO: Implement share functionality
-  }
+  const handleShare = () => console.log("Share technique:", technique?.title)
+  const handleExport = () => console.log("Export technique:", technique?.title)
+  const handleStepPress = (stepId: number) => console.log("Step pressed:", stepId)
+  const handleRetry = () => { setError(null); fetchTechniqueData() }
 
-  const handleExport = () => {
-    console.log("Export technique:", technique?.title)
-    // TODO: Implement export functionality (PDF, etc.)
-  }
+  const handleStart = async () => {
+    if (!technique?.id) return
 
-  const handleEdit = () => {
-    console.log("Edit technique:", technique?.id)
-    // TODO: Navigate to edit screen
-  }
+    if (progress === 'finished') {
+      setShowRestartModal(true) // show modal if finished
+      return
+    }
 
-  const handleStart = () => {
-    console.log("Start technique:", technique?.id)
+    if (progress === 'not_started') await startTechnique(technique.id)
+    else if (progress === 'started') await finishTechnique(technique.id)
+
     router.push({
       pathname: "/stepsList",
-      params: {
-        techniqueId: technique?.id?.toString() || techniqueId,
-        techniqueName: technique?.title,
-      },
+      params: { techniqueId: technique.id.toString(), techniqueName: technique.title },
     })
   }
 
-  const handleStepPress = (stepId: number) => {
-    console.log("Step pressed:", stepId)
-    // TODO: Navigate to step detail or execution
+  const handleRestartConfirm = async () => {
+    if (!technique?.id) return
+    await startTechnique(technique.id)
+    setShowRestartModal(false)
+    router.push({
+      pathname: "/stepsList",
+      params: { techniqueId: technique.id.toString(), techniqueName: technique.title },
+    })
   }
 
-  const handleRetry = () => {
-    setError(null)
-    fetchTechniqueData()
-  }
+  const handleRestartCancel = () => setShowRestartModal(false)
 
-  if (loading) {
-    return (
-      <AuthGuard>
-        <LoadingState />
-      </AuthGuard>
-    )
-  }
-
-  if (error && !technique) {
-    return (
-      <AuthGuard>
-        <ErrorState error={error} onRetry={handleRetry} />
-      </AuthGuard>
-    )
-  }
+  if (loading) return <AuthGuard><LoadingState /></AuthGuard>
+  if (error && !technique) return <AuthGuard><ErrorState error={error} onRetry={handleRetry} /></AuthGuard>
 
   return (
     <AuthGuard>
@@ -287,11 +248,7 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
             headerBackVisible: true,
             headerBackTitle: "",
             headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: {
-              fontSize: 18,
-              fontWeight: "600",
-              color: "#000",
-            },
+            headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
           }}
         />
         <SafeAreaView style={styles.container}>
@@ -300,35 +257,33 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
               source={technique?.image ? { uri: technique.image } : require("@/assets/images/technique.png")}
               style={styles.heroImage}
             />
-
             <TechniqueHeader technique={technique} categoryName={getCategoryName()} />
-
             <View style={styles.descriptionSection}>
               <Text style={styles.sectionTitle}>Description de la Technique :</Text>
               <Text style={styles.descriptionText}>{technique?.description || "Aucune description disponible"}</Text>
             </View>
-
             <View style={styles.stepsSection}>
               <Text style={styles.sectionTitle}>Liste des Étapes :</Text>
-              {steps.length > 0 ? (
-                steps.map((step, index) => (
-                  <TechDetailStep
-                    key={step.id}
-                    stepTitle={step.title}
-                    stepDuration={step.duration}
-                    stepNumber={(index + 1).toString()}
-                    onPress={() => handleStepPress(step.id)}
-                  />
-                ))
-              ) : (
-                <Text style={styles.noStepsText}>Aucune étape disponible</Text>
-              )}
+              {steps.length > 0 ? steps.map((step, index) => (
+                <TechDetailStep
+                  key={step.id}
+                  stepTitle={step.title}
+                  stepDuration={step.duration}
+                  stepNumber={(index + 1).toString()}
+                  onPress={() => handleStepPress(step.id)}
+                />
+              )) : <Text style={styles.noStepsText}>Aucune étape disponible</Text>}
             </View>
           </ScrollView>
         </SafeAreaView>
 
-        {/* Updated BottomActions to include export instead of edit */}
-        <BottomActions onShare={handleShare} onExport={handleExport} onStart={handleStart} />
+        <BottomActions onShare={handleShare} onExport={handleExport} onStart={handleStart} progress={progress} />
+        <RestartTechniqueModal
+          visible={showRestartModal}
+          techniqueTitle={technique?.title || ""}
+          onConfirm={handleRestartConfirm}
+          onCancel={handleRestartCancel}
+        />
       </>
     </AuthGuard>
   )
