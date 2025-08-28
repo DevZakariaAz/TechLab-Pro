@@ -7,35 +7,36 @@ import { getTechniqueSteps, getStepTips, type Step as ApiStep, type StepTip } fr
 import { Colors } from "@/constants/Colors"
 import { Stack } from "expo-router"
 import { AuthGuard } from "@/components/AuthGuard"
+import StepCompletionModal  from "@/components/StepCompletionModal"
 
-const StepCompletionModal = ({
-  visible,
-  stepNumber,
-  stepTitle,
-  onContinue,
-}: {
-  visible: boolean
-  stepNumber: number
-  stepTitle: string
-  onContinue: () => void
-}) => {
-  if (!visible) return null
+// const StepCompletionModal = ({
+//   visible,
+//   stepNumber,
+//   stepTitle,
+//   onContinue,
+// }: {
+//   visible: boolean
+//   stepNumber: number
+//   stepTitle: string
+//   onContinue: () => void
+// }) => {
+//   if (!visible) return null
 
-  return (
-    <View style={modalStyles.overlay}>
-      <View style={modalStyles.modal}>
-        <View style={modalStyles.iconContainer}>
-          <Ionicons name="checkmark-circle" size={64} color="#10B981" />
-        </View>
-        <Text style={modalStyles.title}>Étape {stepNumber} Terminée!</Text>
-        <Text style={modalStyles.subtitle}>{stepTitle}</Text>
-        <TouchableOpacity style={modalStyles.button} onPress={onContinue}>
-          <Text style={modalStyles.buttonText}>Continuer</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  )
-}
+//   return (
+//     <View style={modalStyles.overlay}>
+//       <View style={modalStyles.modal}>
+//         <View style={modalStyles.iconContainer}>
+//           <Ionicons name="checkmark-circle" size={64} color="#10B981" />
+//         </View>
+//         <Text style={modalStyles.title}>Étape {stepNumber} Terminée!</Text>
+//         <Text style={modalStyles.subtitle}>{stepTitle}</Text>
+//         <TouchableOpacity style={modalStyles.button} onPress={onContinue}>
+//           <Text style={modalStyles.buttonText}>Continuer</Text>
+//         </TouchableOpacity>
+//       </View>
+//     </View>
+//   )
+// }
 
 const modalStyles = StyleSheet.create({
   overlay: {
