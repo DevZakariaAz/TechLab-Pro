@@ -11,6 +11,14 @@ class StepSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+
+
+
+    // It's should this seeders by every step have technique 
+    // specefic not all thecknique have the same steps
+
+
+    // todo : make it work by this new solution (attach tips to steps)
     public function run(): void
     {
         $step1 = Step::create([
