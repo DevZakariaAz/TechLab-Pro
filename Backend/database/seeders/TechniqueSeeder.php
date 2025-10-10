@@ -57,7 +57,8 @@ class TechniqueSeeder extends Seeder
             'laboratory_id' => 1,
             'category_id' => 4,
         ]);
-
+        // Attaching relationships to techniques is not soluttion
+        //todo: fix this issue and make it work by another solution 
         $technique->prerequisites()->attach([1]);
         $technique->steps()->attach([1,2,3,4,5]);
         $technique->favoredByUsers()->attach([1,2]);
