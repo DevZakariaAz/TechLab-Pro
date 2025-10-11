@@ -9,12 +9,13 @@ class Step extends Model
     protected $fillable = ['title','reactive','duration','description'];
     public function techniques()
     {
-        return $this->belongsToMany(Technique::class, 'step_technique');
+        return $this->belongsToMany(Technique::class, 'step_technique')
+                    ->withPivot('position');
     }
 
     public function tips()
     {
         return $this->belongsToMany(Tip::class, 'step_tip')
-        ->withPivot('duration');
+                    ->withPivot('duration');
     }
 }
