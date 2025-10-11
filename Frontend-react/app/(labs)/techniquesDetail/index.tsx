@@ -6,7 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { useState, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { getTechniqueDetail, getTechniqueSteps, type TechniqueDetail, type Step } from "@/api/getTechniqueDetail"
+import { getTechniqueDetail, type TechniqueDetail, type Step } from "@/api/getTechniqueDetail"
 import { getCategories, type Category } from "@/api/getCategories"
 import { router } from "expo-router"
 import { AuthGuard } from "@/components/AuthGuard"
@@ -14,42 +14,23 @@ import RestartTechniqueModal from "@/components/RestartTechniqueModal"
 
 const TECHNIQUE_PROGRESS_KEY = "technique_progress";
 
-const TechDetailStep = ({
-  stepTitle,
-  stepDuration,
-  stepNumber,
-  onPress,
-}: {
-  stepTitle: string
-  stepDuration: string
-  stepNumber: string
-  onPress?: () => void
-}) => {
-  return (
-    <TouchableOpacity style={styles.stepContainer} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
-      <View style={styles.stepContent}>
-        <Text style={styles.stepTitle}>{stepTitle}</Text>
-        <Text style={styles.stepDuration}>Durée estimée • {stepDuration} min</Text>
-      </View>
-      <View style={styles.stepNumberContainer}>
-        <Text style={styles.stepNumber}>Étape {stepNumber}</Text>
-      </View>
-    </TouchableOpacity>
-  )
-}
+// Step component
+const TechDetailStep = ({ stepTitle, stepDuration, stepNumber, onPress }: { stepTitle: string; stepDuration: number; stepNumber: string; onPress?: () => void }) => (
+  <TouchableOpacity style={styles.stepContainer} onPress={onPress} activeOpacity={onPress ? 0.7 : 1}>
+    <View style={styles.stepContent}>
+      <Text style={styles.stepTitle}>{stepTitle}</Text>
+      <Text style={styles.stepDuration}>Durée estimée • {stepDuration} min</Text>
+    </View>
+    <View style={styles.stepNumberContainer}>
+      <Text style={styles.stepNumber}>Étape {stepNumber}</Text>
+    </View>
+  </TouchableOpacity>
+)
 
+// Loading and error components
 const LoadingState = () => (
   <>
-    <Stack.Screen
-      options={{
-        title: "Détails de Technique",
-        headerTitleAlign: "center",
-        headerBackVisible: true,
-        headerBackTitle: "",
-        headerStyle: { backgroundColor: "#fff" },
-        headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
-      }}
-    />
+    <Stack.Screen options={{ title: "Détails de Technique", headerTitleAlign: "center", headerBackVisible: true }} />
     <SafeAreaView style={styles.container}>
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#199A8E" />
@@ -61,16 +42,7 @@ const LoadingState = () => (
 
 const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
   <>
-    <Stack.Screen
-      options={{
-        title: "Détails de Technique",
-        headerTitleAlign: "center",
-        headerBackVisible: true,
-        headerBackTitle: "",
-        headerStyle: { backgroundColor: "#fff" },
-        headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
-      }}
-    />
+    <Stack.Screen options={{ title: "Détails de Technique", headerTitleAlign: "center", headerBackVisible: true }} />
     <SafeAreaView style={styles.container}>
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={48} color="#ff6b6b" />
@@ -83,6 +55,7 @@ const ErrorState = ({ error, onRetry }: { error: string; onRetry: () => void }) 
   </>
 )
 
+// Technique header
 const TechniqueHeader = ({ technique, categoryName }: { technique: TechniqueDetail | null; categoryName: string }) => (
   <View style={styles.techniqueInfo}>
     <Text style={styles.title}>{technique?.title || "Chargement du titre..."}</Text>
@@ -90,17 +63,8 @@ const TechniqueHeader = ({ technique, categoryName }: { technique: TechniqueDeta
   </View>
 )
 
-const BottomActions = ({
-  onShare,
-  onExport,
-  onStart,
-  progress,
-}: {
-  onShare: () => void
-  onExport: () => void
-  onStart: () => void
-  progress: 'not_started' | 'started' | 'finished'
-}) => (
+// Bottom action buttons
+const BottomActions = ({ onShare, onExport, onStart, progress }: { onShare: () => void; onExport: () => void; onStart: () => void; progress: 'not_started' | 'started' | 'finished' }) => (
   <View style={styles.bottomNavigation}>
     <TouchableOpacity style={styles.actionButton} onPress={onShare}>
       <Ionicons name="share-outline" size={24} color="#666" />
@@ -110,11 +74,7 @@ const BottomActions = ({
       <Ionicons name="download-outline" size={24} color="#666" />
       <Text style={styles.actionButtonText}>Exporter</Text>
     </TouchableOpacity>
-    <TouchableOpacity
-      style={[styles.startButton, progress === 'finished' && { backgroundColor: '#999' }]}
-      onPress={onStart}
-      disabled={false} // always clickable, even if finished
-    >
+    <TouchableOpacity style={[styles.startButton, progress === 'finished' && { backgroundColor: '#999' }]} onPress={onStart}>
       <Text style={styles.startButtonText}>
         {progress === 'not_started' ? 'Démarrer' : progress === 'started' ? 'Terminer' : 'Recommencer'}
       </Text>
@@ -122,7 +82,7 @@ const BottomActions = ({
   </View>
 )
 
-const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
+export default function TechniquesDetail({ techniqueId = "1" }: { techniqueId?: string }) {
   const [technique, setTechnique] = useState<TechniqueDetail | null>(null)
   const [steps, setSteps] = useState<Step[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -168,18 +128,21 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
     }
   }
 
+  // Fetch technique + categories
   const fetchTechniqueData = async () => {
     try {
       setLoading(true)
       setError(null)
       const numericId = Number.parseInt(techniqueId, 10)
-      const [techniqueData, stepsData, categoriesData] = await Promise.all([
+      const [techniqueData, categoriesData] = await Promise.all([
         getTechniqueDetail(numericId),
-        getTechniqueSteps(numericId),
         getCategories(),
       ])
+
       setTechnique(techniqueData)
-      setSteps(stepsData.sort((a, b) => a.order - b.order))
+      setSteps(
+        (techniqueData.steps || []).sort((a, b) => (a.pivot?.position || 0) - (b.pivot?.position || 0))
+      )
       setCategories(categoriesData.categories || [])
     } catch (err) {
       console.error("Error fetching technique data:", err)
@@ -210,7 +173,7 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
     if (!technique?.id) return
 
     if (progress === 'finished') {
-      setShowRestartModal(true) // show modal if finished
+      setShowRestartModal(true)
       return
     }
 
@@ -241,16 +204,7 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
   return (
     <AuthGuard>
       <>
-        <Stack.Screen
-          options={{
-            title: "Détails de Technique",
-            headerTitleAlign: "center",
-            headerBackVisible: true,
-            headerBackTitle: "",
-            headerStyle: { backgroundColor: "#fff" },
-            headerTitleStyle: { fontSize: 18, fontWeight: "600", color: "#000" },
-          }}
-        />
+        <Stack.Screen options={{ title: "Détails de Technique", headerTitleAlign: "center", headerBackVisible: true }} />
         <SafeAreaView style={styles.container}>
           <ScrollView showsVerticalScrollIndicator={false}>
             <Image
@@ -288,9 +242,6 @@ const TechniquesDetail = ({ techniqueId = "1" }: { techniqueId?: string }) => {
     </AuthGuard>
   )
 }
-
-export default TechniquesDetail
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
