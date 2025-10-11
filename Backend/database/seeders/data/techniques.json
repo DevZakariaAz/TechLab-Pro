@@ -1,0 +1,160 @@
+[
+    {
+        "title": "Analyse Chimique de l'Eau",
+        "image": "https://images.pexels.com/photos/9629678/pexels-photo-9629678.jpeg",
+        "description": "Analyse de la composition chimique de l'eau en laboratoire.",
+        "laboratory_id": 1,
+        "category_id": 1,
+        "steps": [
+            {
+                "title": "Préparation de l’échantillon",
+                "reactive": "Solution saline",
+                "duration": 10,
+                "description": "Préparer l’échantillon avec une solution saline stérile.",
+                "position": 1,
+                "tips": [
+                    {
+                        "tip": "Porter des gants et une blouse de protection",
+                        "description": "Toujours se protéger avant manipulation.",
+                        "duration": 3
+                    },
+                    {
+                        "tip": "Étiqueter l’échantillon",
+                        "description": "Ajouter le nom, la date et le type d’analyse.",
+                        "duration": 2
+                    }
+                ]
+            },
+            {
+                "title": "Ajout du réactif chimique",
+                "reactive": "Réactif de test",
+                "duration": 5,
+                "description": "Ajouter lentement le réactif au mélange.",
+                "position": 2,
+                "tips": [
+                    {
+                        "tip": "Ne pas pipeter à la bouche",
+                        "description": "Utiliser une pipette mécanique.",
+                        "duration": 2
+                    }
+                ]
+            },
+            {
+                "title": "Observation des résultats",
+                "reactive": "Aucun",
+                "duration": 3,
+                "description": "Observer le changement de couleur et noter les résultats.",
+                "position": 3,
+                "tips": [
+                    {
+                        "tip": "Noter les observations immédiatement",
+                        "description": "Éviter les oublis de détails importants.",
+                        "duration": 1
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Culture de Bactéries",
+        "image": "https://images.pexels.com/photos/4031440/pexels-photo-4031440.jpeg",
+        "description": "Étude de la croissance bactérienne sur milieu gélosé.",
+        "laboratory_id": 1,
+        "category_id": 2,
+        "steps": [
+            {
+                "title": "Préparation du milieu de culture",
+                "reactive": "Agar nutritif",
+                "duration": 20,
+                "description": "Préparer et stériliser le milieu nutritif.",
+                "position": 1,
+                "tips": [
+                    {
+                        "tip": "Stériliser tout le matériel avant utilisation",
+                        "description": "Utiliser l’autoclave pour éviter la contamination.",
+                        "duration": 5
+                    }
+                ]
+            },
+            {
+                "title": "Inoculation des échantillons",
+                "reactive": "Échantillon bactérien",
+                "duration": 10,
+                "description": "Déposer délicatement les bactéries sur la gélose stérile.",
+                "position": 2,
+                "tips": [
+                    {
+                        "tip": "Utiliser une anse stérile",
+                        "description": "Pour éviter les contaminations croisées.",
+                        "duration": 2
+                    }
+                ]
+            },
+            {
+                "title": "Incubation",
+                "reactive": "Aucun",
+                "duration": 30,
+                "description": "Placer les boîtes à 37°C pendant 24 heures.",
+                "position": 3,
+                "tips": [
+                    {
+                        "tip": "Ne pas ouvrir les boîtes après incubation",
+                        "description": "Risque biologique élevé.",
+                        "duration": 3
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "title": "Observation Microscopique",
+        "image": "https://images.pexels.com/photos/8539945/pexels-photo-8539945.jpeg",
+        "description": "Observation des micro-organismes au microscope optique.",
+        "laboratory_id": 1,
+        "category_id": 3,
+        "steps": [
+            {
+                "title": "Préparation de la lame",
+                "reactive": "Échantillon biologique",
+                "duration": 5,
+                "description": "Déposer une goutte d’échantillon sur la lame.",
+                "position": 1,
+                "tips": [
+                    {
+                        "tip": "Utiliser une lame propre et sèche",
+                        "description": "Éviter toute contamination de la lame.",
+                        "duration": 2
+                    }
+                ]
+            },
+            {
+                "title": "Fixation de l’échantillon",
+                "reactive": "Fixateur chimique",
+                "duration": 3,
+                "description": "Fixer l’échantillon à l’aide d’un fixateur pour éviter le déplacement.",
+                "position": 2,
+                "tips": [
+                    {
+                        "tip": "Ne pas surchauffer la lame",
+                        "description": "Risque de destruction de l’échantillon.",
+                        "duration": 1
+                    }
+                ]
+            },
+            {
+                "title": "Observation au microscope",
+                "reactive": "Aucun",
+                "duration": 10,
+                "description": "Observer sous différents grossissements et noter les détails morphologiques.",
+                "position": 3,
+                "tips": [
+                    {
+                        "tip": "Commencer avec le plus petit objectif",
+                        "description": "Facilite la mise au point et évite de casser la lame.",
+                        "duration": 1
+                    }
+                ]
+            }
+        ]
+    }
+]
