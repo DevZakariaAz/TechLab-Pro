@@ -37,6 +37,8 @@ class Technique extends Model
 
     public function steps()
     {
-        return $this->belongsToMany(Step::class, 'step_technique');
+    return $this->belongsToMany(Step::class, 'step_technique')
+                ->withPivot('position')
+                ->orderBy('step_technique.position'); 
     }
 }
