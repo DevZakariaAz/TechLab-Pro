@@ -27,6 +27,25 @@ class TechniqueController extends BaseController
             201);
     }
 
+    public function show($id)
+    {
+        $technique = $this->service->find($id);
+
+        if (!$technique) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Technique non trouvée'
+            ], 404);
+        }
+
+        // Load related steps and tips
+        $technique->load(['steps.tips']);
+
+        return response()->json([
+            'status' => true,
+            'data' => $technique
+        ], 200);
+    }
 
     public function update(TechniqueRequest $request, $id)
     {
